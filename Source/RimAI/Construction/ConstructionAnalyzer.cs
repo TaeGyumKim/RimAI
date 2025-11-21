@@ -156,13 +156,22 @@ namespace RimAI.Construction
             state.AvailableWood = map.resourceCounter.GetCount(ThingDefOf.WoodLog);
             state.AvailableSteel = map.resourceCounter.GetCount(ThingDefOf.Steel);
 
-            // 돌은 여러 종류가 있으므로 합산
+            // 돌은 여러 종류가 있으므로 합산 - DefDatabase로 안전하게 조회
             state.AvailableStone = 0;
             state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksGranite);
-            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksLimestone);
+            state.AvailableStone += GetResourceCount(map, "BlocksLimestone");
             state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksMarble);
             state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSandstone);
             state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSlate);
+        }
+
+        /// <summary>
+        /// DefDatabase로 안전하게 자원 수 조회
+        /// </summary>
+        private static int GetResourceCount(Map map, string defName)
+        {
+            var def = DefDatabase<ThingDef>.GetNamedSilentFail(defName);
+            return def != null ? map.resourceCounter.GetCount(def) : 0;
         }
     }
 }

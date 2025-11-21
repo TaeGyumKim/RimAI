@@ -162,17 +162,17 @@ namespace RimAI.Construction
         {
             ThingDef buildingDef = action.TargetThingDef;
 
-            // Def가 없으면 설명에서 추론
+            // Def가 없으면 설명에서 추론 - DefDatabase로 안전하게 조회
             if (buildingDef == null)
             {
                 if (action.Description.Contains("침대"))
                     buildingDef = ThingDefOf.Bed;
                 else if (action.Description.Contains("주방") || action.Description.Contains("요리"))
-                    buildingDef = ThingDefOf.Stove;
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("FueledStove") ?? DefDatabase<ThingDef>.GetNamedSilentFail("ElectricStove");
                 else if (action.Description.Contains("샌드백"))
-                    buildingDef = ThingDefOf.Sandbags;
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("Sandbags");
                 else if (action.Description.Contains("바리케이드"))
-                    buildingDef = ThingDefOf.Barricade;
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("Barricade");
                 else
                     return false; // 알 수 없는 건물
             }
@@ -248,16 +248,28 @@ namespace RimAI.Construction
             }
         }
 
+        // 캐시된 ThingDef 참조 (DefDatabase로 안전하게 조회)
+        private static ThingDef _doubleBed;
+        private static ThingDef DoubleBedDef => _doubleBed ?? (_doubleBed = DefDatabase<ThingDef>.GetNamedSilentFail("DoubleBed"));
+        private static ThingDef _table;
+        private static ThingDef TableDef => _table ?? (_table = DefDatabase<ThingDef>.GetNamedSilentFail("Table2x2c"));
+        private static ThingDef _tableShort;
+        private static ThingDef TableShortDef => _tableShort ?? (_tableShort = DefDatabase<ThingDef>.GetNamedSilentFail("Table1x2c"));
+        private static ThingDef _sandbags;
+        private static ThingDef SandbagsDef => _sandbags ?? (_sandbags = DefDatabase<ThingDef>.GetNamedSilentFail("Sandbags"));
+        private static ThingDef _barricade;
+        private static ThingDef BarricadeDef => _barricade ?? (_barricade = DefDatabase<ThingDef>.GetNamedSilentFail("Barricade"));
+
         /// <summary>
         /// 건물 타입 추론
         /// </summary>
         private BuildingType GetBuildingType(ThingDef def)
         {
-            if (def == ThingDefOf.Bed || def == ThingDefOf.DoubleBed)
+            if (def == ThingDefOf.Bed || def == DoubleBedDef)
                 return BuildingType.Bedroom;
-            else if (def == ThingDefOf.Table || def == ThingDefOf.TableShort)
+            else if (def == TableDef || def == TableShortDef)
                 return BuildingType.DiningRoom;
-            else if (def == ThingDefOf.Sandbags || def == ThingDefOf.Barricade)
+            else if (def == SandbagsDef || def == BarricadeDef)
                 return BuildingType.Defense;
             else
                 return BuildingType.Infrastructure;
@@ -292,7 +304,7 @@ namespace RimAI.Construction
             }
 
             // 방어 시설
-            if (def == ThingDefOf.Sandbags || def == ThingDefOf.Barricade)
+            if (def == SandbagsDef || def == BarricadeDef)
             {
                 if (style == Settings.RimAIPlayStyle.Fortress)
                     return 5; // 방어 중시

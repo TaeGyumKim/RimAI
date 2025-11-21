@@ -41,9 +41,9 @@ namespace RimAI.Research
             try
             {
                 // 현재 연구 중인 프로젝트가 있으면 변경하지 않음
-                if (Find.ResearchManager.currentProj != null)
+                if (Find.ResearchManager.GetProject() != null)
                 {
-                    LogDetailed($"현재 연구 중: {Find.ResearchManager.currentProj.label}");
+                    LogDetailed($"현재 연구 중: {Find.ResearchManager.GetProject().label}");
                     return;
                 }
 
@@ -70,7 +70,7 @@ namespace RimAI.Research
             if (map != Find.Maps.FirstOrDefault()) return actions;
 
             // 현재 연구 중이면 액션 제안하지 않음
-            if (Find.ResearchManager.currentProj != null) return actions;
+            if (Find.ResearchManager.GetProject() != null) return actions;
 
             // 쿨다운 체크
             if (!CanChangeResearch(map)) return actions;
@@ -102,7 +102,7 @@ namespace RimAI.Research
             try
             {
                 // 연구 프로젝트 시작
-                Find.ResearchManager.currentProj = action.TargetResearch;
+                Find.ResearchManager.SetCurrentProject(action.TargetResearch);
 
                 LogInfo($"연구 시작: {action.TargetResearch.label}");
 
@@ -243,10 +243,10 @@ namespace RimAI.Research
         {
             var info = $"[{Name}] Enabled: {Enabled}\n";
 
-            if (Find.ResearchManager.currentProj != null)
+            if (Find.ResearchManager.GetProject() != null)
             {
-                var progress = Find.ResearchManager.currentProj.ProgressPercent;
-                info += $"현재 연구: {Find.ResearchManager.currentProj.label} ({progress:P0})\n";
+                var progress = Find.ResearchManager.GetProject().ProgressPercent;
+                info += $"현재 연구: {Find.ResearchManager.GetProject().label} ({progress:P0})\n";
             }
             else
             {

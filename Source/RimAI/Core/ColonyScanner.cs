@@ -81,7 +81,7 @@ namespace RimAI.Core
             sb.AppendLine($"[RimAI] 건설 중인 청사진: {construction.Count()}개");
 
             // 작업 지시
-            var designations = map.designationManager.allDesignations;
+            var designations = map.designationManager.AllDesignations;
             sb.AppendLine($"[RimAI] 활성 작업 지시: {designations.Count}개");
 
             Log.Message(sb.ToString());

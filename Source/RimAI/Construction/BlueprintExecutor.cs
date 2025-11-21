@@ -280,6 +280,10 @@ namespace RimAI.Construction
             }
         }
 
+        // 캐시된 ThingDef 참조 (DefDatabase로 안전하게 조회)
+        private static ThingDef _blocksLimestone;
+        private static ThingDef BlocksLimestoneDef => _blocksLimestone ?? (_blocksLimestone = DefDatabase<ThingDef>.GetNamedSilentFail("BlocksLimestone"));
+
         /// <summary>
         /// 최적 재질 선택 (목재 > 돌 > 철)
         /// </summary>
@@ -293,12 +297,12 @@ namespace RimAI.Construction
             if (categories == null || categories.Count == 0)
                 return null;
 
-            // 우선순위: 목재 > 돌 > 철
+            // 우선순위: 목재 > 돌 > 철 - DefDatabase로 안전하게 조회
             List<ThingDef> candidates = new List<ThingDef>
             {
                 ThingDefOf.WoodLog,
                 ThingDefOf.BlocksGranite,
-                ThingDefOf.BlocksLimestone,
+                BlocksLimestoneDef,
                 ThingDefOf.BlocksMarble,
                 ThingDefOf.BlocksSandstone,
                 ThingDefOf.BlocksSlate,
@@ -307,6 +311,9 @@ namespace RimAI.Construction
 
             foreach (var candidate in candidates)
             {
+                if (candidate == null)
+                    continue;
+
                 // 카테고리 확인
                 if (candidate.stuffProps?.categories == null)
                     continue;

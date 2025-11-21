@@ -242,17 +242,42 @@ namespace RimAI.GA
         }
 
         /// <summary>
-        /// JSON으로 직렬화
+        /// JSON으로 직렬화 (수동 구현 - .NET Framework 4.7.2 호환)
         /// </summary>
         public string ToJson()
         {
             try
             {
-                // Verse의 SavedGameLoaderNow를 사용하지 않고 수동 JSON 생성
-                return System.Text.Json.JsonSerializer.Serialize(this, new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("{");
+                sb.AppendLine($"  \"SessionId\": \"{EscapeJson(SessionId)}\",");
+                sb.AppendLine($"  \"Seed\": \"{EscapeJson(Seed)}\",");
+                sb.AppendLine($"  \"StartTime\": \"{StartTime:O}\",");
+                sb.AppendLine($"  \"EndTime\": \"{EndTime:O}\",");
+                sb.AppendLine($"  \"GenomeId\": \"{EscapeJson(GenomeId)}\",");
+                sb.AppendLine($"  \"EndReason\": \"{EndReason}\",");
+                sb.AppendLine($"  \"EndDay\": {EndDay},");
+                sb.AppendLine($"  \"TotalDaysSurvived\": {TotalDaysSurvived},");
+                sb.AppendLine($"  \"FinalColonistCount\": {FinalColonistCount},");
+                sb.AppendLine($"  \"MaxColonistCount\": {MaxColonistCount},");
+                sb.AppendLine($"  \"ColonistDeaths\": {ColonistDeaths},");
+                sb.AppendLine($"  \"AnimalDeaths\": {AnimalDeaths},");
+                sb.AppendLine($"  \"AverageMood\": {AverageMood.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"LowestMood\": {LowestMood.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"MentalBreakCount\": {MentalBreakCount},");
+                sb.AppendLine($"  \"FoodCrisesCount\": {FoodCrisesCount},");
+                sb.AppendLine($"  \"SevereIncidentsCount\": {SevereIncidentsCount},");
+                sb.AppendLine($"  \"CombatCount\": {CombatCount},");
+                sb.AppendLine($"  \"CombatVictories\": {CombatVictories},");
+                sb.AppendLine($"  \"FinalWealth\": {FinalWealth.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"FinalBuildingsWealth\": {FinalBuildingsWealth.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"FinalItemsWealth\": {FinalItemsWealth.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"ResearchScore\": {ResearchScore},");
+                sb.AppendLine($"  \"TechLevel\": {TechLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
+                sb.AppendLine($"  \"BuildingsConstructed\": {BuildingsConstructed},");
+                sb.AppendLine($"  \"ItemsProduced\": {ItemsProduced}");
+                sb.AppendLine("}");
+                return sb.ToString();
             }
             catch (Exception ex)
             {
@@ -262,20 +287,67 @@ namespace RimAI.GA
         }
 
         /// <summary>
-        /// JSON에서 역직렬화
+        /// JSON에서 역직렬화 (수동 구현 - .NET Framework 4.7.2 호환)
         /// </summary>
         public static RimAIRunMetrics FromJson(string json)
         {
             try
             {
-                var metrics = System.Text.Json.JsonSerializer.Deserialize<RimAIRunMetrics>(json);
-                return metrics ?? new RimAIRunMetrics();
+                var metrics = new RimAIRunMetrics();
+                metrics.SessionId = ParseJsonString(json, "SessionId") ?? "";
+                metrics.Seed = ParseJsonString(json, "Seed") ?? "";
+                metrics.GenomeId = ParseJsonString(json, "GenomeId") ?? "";
+                metrics.EndReason = ParseJsonString(json, "EndReason") ?? "";
+                metrics.EndDay = ParseJsonInt(json, "EndDay");
+                metrics.TotalDaysSurvived = ParseJsonInt(json, "TotalDaysSurvived");
+                metrics.FinalColonistCount = ParseJsonInt(json, "FinalColonistCount");
+                metrics.MaxColonistCount = ParseJsonInt(json, "MaxColonistCount");
+                metrics.ColonistDeaths = ParseJsonInt(json, "ColonistDeaths");
+                metrics.AnimalDeaths = ParseJsonInt(json, "AnimalDeaths");
+                metrics.AverageMood = ParseJsonFloat(json, "AverageMood");
+                metrics.LowestMood = ParseJsonFloat(json, "LowestMood");
+                metrics.MentalBreakCount = ParseJsonInt(json, "MentalBreakCount");
+                metrics.FoodCrisesCount = ParseJsonInt(json, "FoodCrisesCount");
+                metrics.SevereIncidentsCount = ParseJsonInt(json, "SevereIncidentsCount");
+                metrics.CombatCount = ParseJsonInt(json, "CombatCount");
+                metrics.CombatVictories = ParseJsonInt(json, "CombatVictories");
+                metrics.FinalWealth = ParseJsonFloat(json, "FinalWealth");
+                metrics.FinalBuildingsWealth = ParseJsonFloat(json, "FinalBuildingsWealth");
+                metrics.FinalItemsWealth = ParseJsonFloat(json, "FinalItemsWealth");
+                metrics.ResearchScore = ParseJsonInt(json, "ResearchScore");
+                metrics.TechLevel = ParseJsonFloat(json, "TechLevel");
+                metrics.BuildingsConstructed = ParseJsonInt(json, "BuildingsConstructed");
+                metrics.ItemsProduced = ParseJsonInt(json, "ItemsProduced");
+                return metrics;
             }
             catch (Exception ex)
             {
                 Log.Error($"[RimAI-GA] Metrics JSON 역직렬화 실패: {ex.Message}");
                 return new RimAIRunMetrics();
             }
+        }
+
+        private static string EscapeJson(string s) => s?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? "";
+
+        private static string ParseJsonString(string json, string key)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*\"([^\"]*)\"";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private static int ParseJsonInt(string json, string key)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*(-?\\d+)";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success && int.TryParse(match.Groups[1].Value, out int val) ? val : 0;
+        }
+
+        private static float ParseJsonFloat(string json, string key)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*(-?[\\d.]+)";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success && float.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float val) ? val : 0f;
         }
 
         /// <summary>

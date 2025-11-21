@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -154,12 +155,13 @@ namespace RimAI.Construction
             if (building != null)
                 return true;
 
-            // 기존 청사진/공사 프레임
-            if (map.blueprintGrid[cell] != null)
-                return true;
-
-            if (map.frameGrid[cell] != null)
-                return true;
+            // 기존 청사진/공사 프레임 - ThingGrid 사용
+            var thingsAtCell = map.thingGrid.ThingsListAt(cell);
+            foreach (var thing in thingsAtCell)
+            {
+                if (thing.def.IsBlueprint || thing.def.isFrame)
+                    return true;
+            }
 
             // 이동 불가능한 물건 (큰 돌, 잔해 등)
             List<Thing> things = map.thingGrid.ThingsListAt(cell);

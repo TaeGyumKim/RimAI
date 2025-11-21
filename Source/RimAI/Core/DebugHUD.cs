@@ -223,7 +223,7 @@ namespace RimAI.Core
             if (resSub != null)
             {
                 sb.AppendLine($"[Research] {(resSub.Enabled ? "ON" : "OFF")}");
-                var current = Find.ResearchManager?.currentProj;
+                var current = Find.ResearchManager?.GetProject();
                 if (current != null)
                 {
                     sb.AppendLine($"  Current: {current.label}");

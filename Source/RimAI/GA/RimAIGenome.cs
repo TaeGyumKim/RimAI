@@ -279,16 +279,51 @@ namespace RimAI.GA
         }
 
         /// <summary>
-        /// JSON으로 직렬화
+        /// JSON으로 직렬화 (수동 구현 - .NET Framework 4.7.2 호환)
         /// </summary>
         public string ToJson()
         {
             try
             {
-                return System.Text.Json.JsonSerializer.Serialize(this, new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
+                var sb = new System.Text.StringBuilder();
+                var culture = System.Globalization.CultureInfo.InvariantCulture;
+                sb.AppendLine("{");
+                sb.AppendLine($"  \"GenomeId\": \"{EscapeJson(GenomeId)}\",");
+                sb.AppendLine($"  \"CreatedAt\": \"{CreatedAt:O}\",");
+                sb.AppendLine($"  \"Generation\": {Generation},");
+                sb.AppendLine($"  \"ParentId1\": \"{EscapeJson(ParentId1)}\",");
+                sb.AppendLine($"  \"ParentId2\": \"{EscapeJson(ParentId2)}\",");
+                sb.AppendLine($"  \"FoodPriorityWeight\": {FoodPriorityWeight.ToString(culture)},");
+                sb.AppendLine($"  \"CombatPriorityWeight\": {CombatPriorityWeight.ToString(culture)},");
+                sb.AppendLine($"  \"ConstructionPriorityWeight\": {ConstructionPriorityWeight.ToString(culture)},");
+                sb.AppendLine($"  \"ProductionPriorityWeight\": {ProductionPriorityWeight.ToString(culture)},");
+                sb.AppendLine($"  \"ResearchPriorityWeight\": {ResearchPriorityWeight.ToString(culture)},");
+                sb.AppendLine($"  \"FoodCrisisThreshold\": {FoodCrisisThreshold.ToString(culture)},");
+                sb.AppendLine($"  \"FoodWarningThreshold\": {FoodWarningThreshold.ToString(culture)},");
+                sb.AppendLine($"  \"FoodStableThreshold\": {FoodStableThreshold.ToString(culture)},");
+                sb.AppendLine($"  \"WinterPrepDays\": {WinterPrepDays},");
+                sb.AppendLine($"  \"BedBuffer\": {BedBuffer},");
+                sb.AppendLine($"  \"DefensePerColonist\": {DefensePerColonist.ToString(culture)},");
+                sb.AppendLine($"  \"ConstructionCooldown\": {ConstructionCooldown},");
+                sb.AppendLine($"  \"SteelShortageThreshold\": {SteelShortageThreshold},");
+                sb.AppendLine($"  \"ComponentShortageThreshold\": {ComponentShortageThreshold},");
+                sb.AppendLine($"  \"SteelSurplusThreshold\": {SteelSurplusThreshold},");
+                sb.AppendLine($"  \"ComponentSurplusThreshold\": {ComponentSurplusThreshold},");
+                sb.AppendLine($"  \"ProductionCooldown\": {ProductionCooldown},");
+                sb.AppendLine($"  \"MedicinePerColonist\": {MedicinePerColonist},");
+                sb.AppendLine($"  \"ThreatDetectionRange\": {ThreatDetectionRange.ToString(culture)},");
+                sb.AppendLine($"  \"CombatStartThreshold\": {CombatStartThreshold},");
+                sb.AppendLine($"  \"CombatEndDelay\": {CombatEndDelay},");
+                sb.AppendLine($"  \"ResearchCombatPriority\": {ResearchCombatPriority.ToString(culture)},");
+                sb.AppendLine($"  \"ResearchEconomyPriority\": {ResearchEconomyPriority.ToString(culture)},");
+                sb.AppendLine($"  \"ResearchMedicalPriority\": {ResearchMedicalPriority.ToString(culture)},");
+                sb.AppendLine($"  \"DefensiveBias\": {DefensiveBias.ToString(culture)},");
+                sb.AppendLine($"  \"ExpansionBias\": {ExpansionBias.ToString(culture)},");
+                sb.AppendLine($"  \"ResearchBias\": {ResearchBias.ToString(culture)},");
+                sb.AppendLine($"  \"WelfareBias\": {WelfareBias.ToString(culture)},");
+                sb.AppendLine($"  \"UpdateSpeedMultiplier\": {UpdateSpeedMultiplier.ToString(culture)}");
+                sb.AppendLine("}");
+                return sb.ToString();
             }
             catch (Exception ex)
             {
@@ -298,20 +333,76 @@ namespace RimAI.GA
         }
 
         /// <summary>
-        /// JSON에서 역직렬화
+        /// JSON에서 역직렬화 (수동 구현 - .NET Framework 4.7.2 호환)
         /// </summary>
         public static RimAIGenome FromJson(string json)
         {
             try
             {
-                var genome = System.Text.Json.JsonSerializer.Deserialize<RimAIGenome>(json);
-                return genome ?? CreateDefault();
+                var genome = new RimAIGenome();
+                genome.GenomeId = ParseJsonString(json, "GenomeId") ?? "default";
+                genome.ParentId1 = ParseJsonString(json, "ParentId1") ?? "";
+                genome.ParentId2 = ParseJsonString(json, "ParentId2") ?? "";
+                genome.Generation = ParseJsonInt(json, "Generation");
+                genome.FoodPriorityWeight = ParseJsonFloat(json, "FoodPriorityWeight", 1.0f);
+                genome.CombatPriorityWeight = ParseJsonFloat(json, "CombatPriorityWeight", 1.0f);
+                genome.ConstructionPriorityWeight = ParseJsonFloat(json, "ConstructionPriorityWeight", 1.0f);
+                genome.ProductionPriorityWeight = ParseJsonFloat(json, "ProductionPriorityWeight", 1.0f);
+                genome.ResearchPriorityWeight = ParseJsonFloat(json, "ResearchPriorityWeight", 1.0f);
+                genome.FoodCrisisThreshold = ParseJsonFloat(json, "FoodCrisisThreshold", 4.0f);
+                genome.FoodWarningThreshold = ParseJsonFloat(json, "FoodWarningThreshold", 7.0f);
+                genome.FoodStableThreshold = ParseJsonFloat(json, "FoodStableThreshold", 15.0f);
+                genome.WinterPrepDays = ParseJsonInt(json, "WinterPrepDays", 30);
+                genome.BedBuffer = ParseJsonInt(json, "BedBuffer", 2);
+                genome.DefensePerColonist = ParseJsonFloat(json, "DefensePerColonist", 2.0f);
+                genome.ConstructionCooldown = ParseJsonInt(json, "ConstructionCooldown", 3600);
+                genome.SteelShortageThreshold = ParseJsonInt(json, "SteelShortageThreshold", 100);
+                genome.ComponentShortageThreshold = ParseJsonInt(json, "ComponentShortageThreshold", 5);
+                genome.SteelSurplusThreshold = ParseJsonInt(json, "SteelSurplusThreshold", 500);
+                genome.ComponentSurplusThreshold = ParseJsonInt(json, "ComponentSurplusThreshold", 20);
+                genome.ProductionCooldown = ParseJsonInt(json, "ProductionCooldown", 3600);
+                genome.MedicinePerColonist = ParseJsonInt(json, "MedicinePerColonist", 10);
+                genome.ThreatDetectionRange = ParseJsonFloat(json, "ThreatDetectionRange", 30f);
+                genome.CombatStartThreshold = ParseJsonInt(json, "CombatStartThreshold", 3);
+                genome.CombatEndDelay = ParseJsonInt(json, "CombatEndDelay", 2500);
+                genome.ResearchCombatPriority = ParseJsonFloat(json, "ResearchCombatPriority", 1.0f);
+                genome.ResearchEconomyPriority = ParseJsonFloat(json, "ResearchEconomyPriority", 1.0f);
+                genome.ResearchMedicalPriority = ParseJsonFloat(json, "ResearchMedicalPriority", 1.0f);
+                genome.DefensiveBias = ParseJsonFloat(json, "DefensiveBias", 1.0f);
+                genome.ExpansionBias = ParseJsonFloat(json, "ExpansionBias", 1.0f);
+                genome.ResearchBias = ParseJsonFloat(json, "ResearchBias", 1.0f);
+                genome.WelfareBias = ParseJsonFloat(json, "WelfareBias", 1.0f);
+                genome.UpdateSpeedMultiplier = ParseJsonFloat(json, "UpdateSpeedMultiplier", 1.0f);
+                return genome;
             }
             catch (Exception ex)
             {
                 Log.Error($"[RimAI-GA] Genome JSON 역직렬화 실패: {ex.Message}");
                 return CreateDefault();
             }
+        }
+
+        private static string EscapeJson(string s) => s?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? "";
+
+        private static string ParseJsonString(string json, string key)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*\"([^\"]*)\"";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private static int ParseJsonInt(string json, string key, int defaultValue = 0)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*(-?\\d+)";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success && int.TryParse(match.Groups[1].Value, out int val) ? val : defaultValue;
+        }
+
+        private static float ParseJsonFloat(string json, string key, float defaultValue = 0f)
+        {
+            var pattern = $"\"{key}\"\\s*:\\s*(-?[\\d.]+)";
+            var match = System.Text.RegularExpressions.Regex.Match(json, pattern);
+            return match.Success && float.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float val) ? val : defaultValue;
         }
 
         /// <summary>
