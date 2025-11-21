@@ -86,10 +86,19 @@ namespace RimAI.Core
         /// </summary>
         private void ProcessMap(Map map)
         {
+            // 전투 상태 확인
+            bool inCombat = IsMapInCombat(map);
+
             // 1. 모든 서브시스템 업데이트
             foreach (var subsystem in subsystems)
             {
                 if (!subsystem.Enabled) continue;
+
+                // 전투 중일 때는 비전투 서브시스템 일시 정지
+                if (inCombat && ShouldPauseDuringCombat(subsystem))
+                {
+                    continue;
+                }
 
                 try
                 {
@@ -102,16 +111,47 @@ namespace RimAI.Core
             }
 
             // 2. 액션 수집 및 우선순위 조정
-            CollectAndPrioritizeActions(map);
+            CollectAndPrioritizeActions(map, inCombat);
 
             // 3. 액션 실행
             ExecutePendingActions(map);
         }
 
         /// <summary>
+        /// 맵이 전투 중인지 확인
+        /// </summary>
+        private bool IsMapInCombat(Map map)
+        {
+            // Combat 서브시스템에서 전투 상태 확인
+            var combatSubsystem = GetSubsystem<RimAI.Combat.CombatDefenseSubsystem>();
+            if (combatSubsystem != null)
+            {
+                return combatSubsystem.IsInCombat(map);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 전투 중 일시 정지해야 하는 서브시스템인지 확인
+        /// </summary>
+        private bool ShouldPauseDuringCombat(IRimAISubsystem subsystem)
+        {
+            // Combat, Food는 항상 작동
+            if (subsystem.Name == "Combat" || subsystem.Name == "Food")
+                return false;
+
+            // Construction, Research는 전투 중 일시 정지
+            if (subsystem.Name == "Construction" || subsystem.Name == "Research")
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
         /// 모든 서브시스템에서 제안된 액션 수집 및 우선순위 정렬
         /// </summary>
-        private void CollectAndPrioritizeActions(Map map)
+        private void CollectAndPrioritizeActions(Map map, bool inCombat)
         {
             var allActions = new List<RimAIAction>();
 

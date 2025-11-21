@@ -44,13 +44,16 @@ namespace RimAI.Core.Patches
         /// </summary>
         private static void RegisterAllSubsystems(RimAIManager manager)
         {
-            // 1. 식량 서브시스템 (우선순위: 100 - 가장 높음)
+            // 1. 전투 서브시스템 (우선순위: 150 - 최우선)
+            manager.RegisterSubsystem(new RimAI.Combat.CombatDefenseSubsystem());
+
+            // 2. 식량 서브시스템 (우선순위: 100)
             manager.RegisterSubsystem(new FoodSubsystem());
 
-            // 2. 건설 서브시스템 (우선순위: 50)
+            // 3. 건설 서브시스템 (우선순위: 50)
             manager.RegisterSubsystem(new ConstructionSubsystem());
 
-            // 3. 연구 서브시스템 (우선순위: 30)
+            // 4. 연구 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ResearchSubsystem());
         }
     }
