@@ -233,7 +233,7 @@ namespace RimAI.GA
             }
 
             // 10. 콜로니 포기 페널티
-            if (EndReasonEnum == EndReason.ColonyAbandoned)
+            if (EndReasonEnum == GA.EndReason.ColonyAbandoned)
             {
                 fitness -= 2000f;
             }

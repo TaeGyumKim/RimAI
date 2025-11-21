@@ -38,8 +38,8 @@ namespace RimAI.Combat
                 // 원래 상태 저장 (첫 전투 시)
                 if (!isCinematicMode)
                 {
-                    originalPosition = cameraDriver.MapPosition;
-                    originalZoom = cameraDriver.rootSize;
+                    originalPosition = cameraDriver.MapPosition.ToVector3();
+                    originalZoom = NORMAL_ZOOM_LEVEL; // 기본 줌 레벨 저장
                     isCinematicMode = true;
                 }
 
@@ -89,16 +89,10 @@ namespace RimAI.Combat
         {
             try
             {
-                var cameraDriver = Find.CameraDriver;
-
-                // 현재 줌 레벨 가져오기
-                float currentZoom = cameraDriver.rootSize;
-
-                // 목표 줌 레벨로 부드럽게 이동
-                // RimWorld 1.4/1.5에서는 CameraDriver.config.sizeRange를 사용하거나
-                // 직접 접근이 제한됨 - JumpToCurrentMapLoc만 사용
-                // SetRootSize 대신 직접 zoom 제어는 제한적이므로 로그만 남김
-                Log.Message($"[RimAI-Camera] 줌 레벨 목표: {targetZoom} (현재: {currentZoom})");
+                // RimWorld 1.4/1.5에서는 CameraDriver의 줌 레벨 직접 접근이 제한됨
+                // JumpToCurrentMapLoc만 사용 가능하며, 줌 조절은 제한적
+                // 추후 버전별 API 대응 필요 시 여기에 구현
+                Log.Message($"[RimAI-Camera] 줌 레벨 목표: {targetZoom}");
             }
             catch (System.Exception ex)
             {
