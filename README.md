@@ -14,7 +14,7 @@ RimAI는 RimWorld의 기본 AI 위에 올라가는 **상위 의사결정 레이�
 - 위기 상황 자동 대응
 
 ### 현재 버전
-**v0.1.0 (알파)** - 1단계: 프로젝트 스캐폴딩 및 기본 구조
+**v0.2.0 (알파)** - 2단계: 식량/농사 자동화 시스템 구현
 
 ## 폴더 구조
 
@@ -24,12 +24,23 @@ RimAI/
 │   └── About.xml              # 모드 정보 (이름, 설명, 버전, 의존성)
 ├── Assemblies/                # 빌드된 DLL 파일
 │   └── RimAI.dll              # (빌드 후 생성됨)
+├── Docs/                      # 설계 문서
+│   ├── RimWorld-WorkSystem-Overview.md
+│   └── Stage2-FoodAutomation-Design.md
 ├── Source/                    # C# 소스 코드
 │   └── RimAI/
 │       ├── RimAI.csproj       # C# 프로젝트 파일
 │       ├── RimAI_Mod.cs       # Harmony 부트스트랩 클래스
-│       └── Core/
-│           └── ColonyScanner.cs  # 콜로니 상태 스캔 클래스
+│       ├── Core/              # 코어 시스템
+│       │   └── ColonyScanner.cs
+│       └── Food/              # 식량 자동화 시스템
+│           ├── FoodState.cs   # 식량 상태 데이터 모델
+│           ├── FoodAnalyzer.cs # 식량 상태 분석기
+│           ├── FoodDecisionEngine.cs # 의사결정 엔진
+│           ├── FoodManager.cs # 중앙 관리자
+│           └── Patches/       # Harmony 패치
+│               ├── GamePatches.cs
+│               └── WorkGiverPatches.cs
 ├── Defs/                      # XML 정의 파일 (향후 추가)
 ├── .gitignore                 # Git 제외 파일 목록
 └── README.md                  # 이 파일
@@ -126,16 +137,19 @@ mklink /D "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\RimAI" "C
 
 ## 개발 로드맵
 
-### ✅ 1단계: 프로젝트 스캐폴딩 + 최소 동작 (현재)
+### ✅ 1단계: 프로젝트 스캐폴딩 + 최소 동작 (완료)
 - [x] RimWorld 모드 기본 구조 생성
 - [x] Harmony 부트스트랩 코드 작성
 - [x] 게임 로드 시 콜로니 상태 스캔 및 로그 출력
 
-### 🔄 2단계: 식량 자동화 (예정)
-- [ ] 식량 저장량 모니터링 시스템
-- [ ] 농사 작업 우선순위 자동 조정
-- [ ] 채집/사냥 작업 자동 지시
-- [ ] 요리 작업 자동 관리
+### ✅ 2단계: 식량 자동화 (완료 - 현재)
+- [x] 식량 저장량 모니터링 시스템 (FoodAnalyzer)
+- [x] 농사 작업 우선순위 자동 조정 (FoodDecisionEngine)
+- [x] 사냥 작업 자동 지시
+- [x] 요리 작업 자동 관리
+- [x] 계절별 농사 대응 (겨울 대비, 봄 파종)
+- [x] WorkGiver 패치를 통한 작업 제어
+- [ ] 채집 작업 자동 지시 (2.1단계에서 추가 예정)
 
 ### 📋 3단계: 건설 및 생산 자동화 (예정)
 - [ ] 건설 우선순위 자동 결정
