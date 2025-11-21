@@ -3,6 +3,7 @@ using RimAI.Food;
 using RimAI.Construction;
 using RimAI.Research;
 using RimAI.Production;
+using RimAI.Medical;
 using Verse;
 
 namespace RimAI.Core.Patches
@@ -59,13 +60,16 @@ namespace RimAI.Core.Patches
             // 2. 식량 서브시스템 (우선순위: 100)
             manager.RegisterSubsystem(new FoodSubsystem());
 
-            // 3. 건설 서브시스템 (우선순위: 50)
+            // 3. 의료 서브시스템 (우선순위: 95 - 식량 다음)
+            manager.RegisterSubsystem(new MedicalSubsystem());
+
+            // 4. 건설 서브시스템 (우선순위: 50)
             manager.RegisterSubsystem(new ConstructionSubsystem());
 
-            // 4. 생산 서브시스템 (우선순위: 30)
+            // 5. 생산 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ProductionSubsystem());
 
-            // 5. 연구 서브시스템 (우선순위: 30)
+            // 6. 연구 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ResearchSubsystem());
         }
     }

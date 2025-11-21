@@ -142,8 +142,8 @@ namespace RimAI.Core
         /// </summary>
         private bool ShouldPauseDuringCombat(IRimAISubsystem subsystem)
         {
-            // Combat, Food는 항상 작동
-            if (subsystem.Name == "Combat" || subsystem.Name == "Food")
+            // Combat, Food, Medical은 항상 작동 (생존 필수)
+            if (subsystem.Name == "Combat" || subsystem.Name == "Food" || subsystem.Name == "Medical")
                 return false;
 
             // Construction, Production, Research는 전투 중 일시 정지

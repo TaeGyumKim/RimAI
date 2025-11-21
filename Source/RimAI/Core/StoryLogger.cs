@@ -386,6 +386,83 @@ namespace RimAI.Core
         }
 
         /// <summary>
+        /// 의료 관련 스토리 로그
+        /// </summary>
+        public static class Medical
+        {
+            public static void Emergency(int criticalCount, int bleedingCount)
+            {
+                Log($"의료 비상! 중상자 {criticalCount}명, 출혈 환자 {bleedingCount}명. 즉시 치료가 필요합니다.");
+            }
+
+            public static void PatientTreated(string patientName)
+            {
+                Log($"{patientName}의 치료가 완료되었습니다.");
+            }
+
+            public static void InfectionWarning(string patientName)
+            {
+                Log($"경고! {patientName}에게 감염이 발생했습니다. 치료를 서두르세요.");
+            }
+
+            public static void ImmunityRace(string patientName, string diseaseName, float winProbability)
+            {
+                if (winProbability < 0.5f)
+                {
+                    Log($"위험! {patientName}이(가) {diseaseName}과 싸우고 있습니다. 승산이 낮습니다 ({winProbability:P0})!");
+                }
+                else
+                {
+                    Log($"{patientName}이(가) {diseaseName}에 대한 면역을 키우고 있습니다. 승산: {winProbability:P0}");
+                }
+            }
+
+            public static void DiseaseOutbreak(string diseaseName, int affectedCount)
+            {
+                Log($"질병 발생! {diseaseName}이(가) 콜로니에 퍼지고 있습니다. 감염자: {affectedCount}명");
+            }
+
+            public static void MedicineShortage(int currentMedicine, int colonistCount)
+            {
+                Log($"의약품 부족! 현재 {currentMedicine}개 (콜로니스트 {colonistCount}명). 생산을 늘리세요.");
+            }
+
+            public static void BedShortage(int neededBeds)
+            {
+                Log($"의료 침대 부족! {neededBeds}개 추가 건설이 필요합니다.");
+            }
+
+            public static void DoctorShortage(int currentDoctors, int patientsWaiting)
+            {
+                Log($"의료 인력 부족! 의사 {currentDoctors}명으로 {patientsWaiting}명의 환자를 감당하기 어렵습니다.");
+            }
+
+            public static void RecoveryComplete(string patientName)
+            {
+                Log($"{patientName}이(가) 완전히 회복되었습니다!");
+            }
+
+            public static void GlitterworldMedicineUsed(string patientName)
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Researcher)
+                {
+                    Log($"최첨단 글리터월드 의약품을 {patientName} 치료에 사용합니다.");
+                }
+                else
+                {
+                    Log($"긴급 상황! 글리터월드 의약품을 {patientName}에게 사용합니다.");
+                }
+            }
+
+            public static void Stable()
+            {
+                Log("의료 상황 안정. 모든 콜로니스트가 건강합니다.");
+            }
+        }
+
+        /// <summary>
         /// 일반 스토리 이벤트
         /// </summary>
         public static class General
