@@ -69,28 +69,58 @@ namespace RimAI.Construction
             state.HasKitchen = false;
             state.HasWorkshop = false;
             state.HasResearchBench = false;
+            state.HasPowerGenerator = false;
+            state.PowerGenerators = 0;
+            state.StandingLamps = 0;
+            state.Tables = 0;
+            state.Chairs = 0;
+            state.HasDiningArea = false;
 
-            // 단일 순회로 모든 건물 체크 (이전: 3번 순회 → 현재: 1번)
+            // 단일 순회로 모든 건물 체크
             foreach (var building in map.listerBuildings.allBuildingsColonist)
             {
+                string defName = building.def.defName;
+
                 // 주방 확인 (요리대)
                 if (!state.HasKitchen && building.def.building?.isMealSource == true)
                     state.HasKitchen = true;
 
                 // 작업장 확인 (제작대)
                 if (!state.HasWorkshop &&
-                    (building.def.defName.Contains("TableMachining") ||
-                     building.def.defName.Contains("Workbench")))
+                    (defName.Contains("TableMachining") || defName.Contains("Workbench")))
                     state.HasWorkshop = true;
 
                 // 연구대 확인
-                if (!state.HasResearchBench && building.def.defName.Contains("ResearchBench"))
+                if (!state.HasResearchBench && defName.Contains("ResearchBench"))
                     state.HasResearchBench = true;
 
-                // 조기 종료: 모두 찾았으면 더 이상 순회하지 않음
-                if (state.HasKitchen && state.HasWorkshop && state.HasResearchBench)
-                    break;
+                // 전력 발전기 확인
+                if (defName.Contains("SolarGenerator") || defName.Contains("WindTurbine") ||
+                    defName.Contains("WoodFiredGenerator") || defName.Contains("ChemfuelPoweredGenerator") ||
+                    defName.Contains("GeothermalGenerator") || defName.Contains("WatermillGenerator"))
+                {
+                    state.HasPowerGenerator = true;
+                    state.PowerGenerators++;
+                }
+
+                // 조명 확인
+                if (defName.Contains("StandingLamp") || defName == "TorchLamp")
+                    state.StandingLamps++;
+
+                // 식탁 확인
+                if (defName.Contains("Table"))
+                    state.Tables++;
+
+                // 의자 확인
+                if (defName.Contains("DiningChair") || defName.Contains("Stool"))
+                    state.Chairs++;
             }
+
+            // 식사 공간 여부 (테이블 + 의자)
+            state.HasDiningArea = state.Tables > 0 && state.Chairs >= state.ColonistCount;
+
+            // 조명 필요 여부
+            state.NeedMoreLighting = state.StandingLamps < state.ColonistCount;
 
             // 창고 확인 (스톡파일 구역)
             state.HasStorageRoom = map.zoneManager.AllZones

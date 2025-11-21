@@ -14,7 +14,7 @@ namespace RimAI.Construction
     {
         // 쿨다운 관리 (맵별)
         private Dictionary<Map, int> lastConstructionTick = new Dictionary<Map, int>();
-        private const int CONSTRUCTION_COOLDOWN = 60000; // 1000초 (약 16분) - 큰 변화는 드물게
+        private const int CONSTRUCTION_COOLDOWN = 2500; // 약 40초 - 더 적극적으로 건설
 
         // 맵별 상태 캐시
         private Dictionary<Map, ColonyConstructionState> mapStates = new Dictionary<Map, ColonyConstructionState>();
@@ -108,7 +108,59 @@ namespace RimAI.Construction
                 }
             }
 
-            // 3. 방어 시설 부족
+            // 3. 전력 시설 필요
+            if (state.NeedPower())
+            {
+                actions.Add(new RimAIAction
+                {
+                    Type = RimAIActionType.ConstructBuilding,
+                    Priority = RimAIActionPriority.High,
+                    SourceSubsystem = Name,
+                    TargetMap = map,
+                    Description = "전력 시설 없음 - 태양광 발전기 건설 필요"
+                });
+            }
+
+            // 4. 연구대 필요
+            if (state.NeedResearchBench())
+            {
+                actions.Add(new RimAIAction
+                {
+                    Type = RimAIActionType.ConstructBuilding,
+                    Priority = RimAIActionPriority.Normal,
+                    SourceSubsystem = Name,
+                    TargetMap = map,
+                    Description = "연구대 없음 - 기본 연구대 건설 필요"
+                });
+            }
+
+            // 5. 식탁 필요
+            if (state.NeedDiningArea())
+            {
+                actions.Add(new RimAIAction
+                {
+                    Type = RimAIActionType.ConstructBuilding,
+                    Priority = RimAIActionPriority.Normal,
+                    SourceSubsystem = Name,
+                    TargetMap = map,
+                    Description = "식탁 없음 - 테이블과 의자 건설 필요"
+                });
+            }
+
+            // 6. 조명 필요
+            if (state.NeedLighting())
+            {
+                actions.Add(new RimAIAction
+                {
+                    Type = RimAIActionType.ConstructBuilding,
+                    Priority = RimAIActionPriority.Low,
+                    SourceSubsystem = Name,
+                    TargetMap = map,
+                    Description = "조명 부족 - 스탠딩 램프 건설 권장"
+                });
+            }
+
+            // 7. 방어 시설 부족
             if (state.NeedDefenses() && state.ColonistCount >= 3)
             {
                 actions.Add(new RimAIAction
@@ -174,6 +226,19 @@ namespace RimAI.Construction
                     buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("Sandbags");
                 else if (action.Description.Contains("바리케이드"))
                     buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("Barricade");
+                else if (action.Description.Contains("태양광") || action.Description.Contains("전력"))
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("SolarGenerator");
+                else if (action.Description.Contains("연구대"))
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("SimpleResearchBench");
+                else if (action.Description.Contains("테이블") || action.Description.Contains("식탁"))
+                {
+                    // 테이블 건설 후 의자도 건설
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("Table2x2c");
+                    // 의자 건설도 함께
+                    BuildChairs(map, 4);
+                }
+                else if (action.Description.Contains("램프") || action.Description.Contains("조명"))
+                    buildingDef = DefDatabase<ThingDef>.GetNamedSilentFail("StandingLamp");
                 else
                     return false; // 알 수 없는 건물
             }
@@ -317,6 +382,26 @@ namespace RimAI.Construction
 
             // 기타
             return 1;
+        }
+
+        /// <summary>
+        /// 의자 여러 개 건설 헬퍼
+        /// </summary>
+        private void BuildChairs(Map map, int count)
+        {
+            var chairDef = DefDatabase<ThingDef>.GetNamedSilentFail("DiningChair");
+            if (chairDef == null) return;
+
+            for (int i = 0; i < count; i++)
+            {
+                IntVec3? location = BuildingPlacer.FindBestLocation(
+                    map, chairDef, new IntVec2(1, 1), BuildingType.DiningRoom);
+
+                if (location != null)
+                {
+                    BlueprintExecutor.PlaceSingleBuilding(map, chairDef, location.Value);
+                }
+            }
         }
 
         /// <summary>
