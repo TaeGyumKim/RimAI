@@ -1,5 +1,6 @@
 using HarmonyLib;
 using RimWorld;
+using RimAI.Core;
 using Verse;
 using Verse.AI;
 
@@ -18,10 +19,13 @@ namespace RimAI.Food.Patches
         {
             if (!RimAI_Settings.EnableFoodAutomation) return;
 
-            var manager = FoodManager.Instance;
+            var manager = RimAIManager.Instance;
             if (manager == null) return;
 
-            var decision = manager.GetDecision(pawn.Map);
+            var foodSubsystem = manager.GetSubsystem<FoodSubsystem>();
+            if (foodSubsystem == null) return;
+
+            var decision = foodSubsystem.GetDecision(pawn.Map);
             if (decision == null) return;
 
             // 우선순위가 None이면 작업 스킵
@@ -50,10 +54,13 @@ namespace RimAI.Food.Patches
         {
             if (!RimAI_Settings.EnableFoodAutomation) return;
 
-            var manager = FoodManager.Instance;
+            var manager = RimAIManager.Instance;
             if (manager == null) return;
 
-            var decision = manager.GetDecision(pawn.Map);
+            var foodSubsystem = manager.GetSubsystem<FoodSubsystem>();
+            if (foodSubsystem == null) return;
+
+            var decision = foodSubsystem.GetDecision(pawn.Map);
             if (decision == null) return;
 
             if (decision.HarvestingPriority == FoodWorkPriority.None)
@@ -79,10 +86,13 @@ namespace RimAI.Food.Patches
         {
             if (!RimAI_Settings.EnableFoodAutomation) return;
 
-            var manager = FoodManager.Instance;
+            var manager = RimAIManager.Instance;
             if (manager == null) return;
 
-            var decision = manager.GetDecision(pawn.Map);
+            var foodSubsystem = manager.GetSubsystem<FoodSubsystem>();
+            if (foodSubsystem == null) return;
+
+            var decision = foodSubsystem.GetDecision(pawn.Map);
             if (decision == null) return;
 
             if (decision.HuntingPriority == FoodWorkPriority.None)
@@ -113,10 +123,13 @@ namespace RimAI.Food.Patches
             if (!RimAI_Settings.EnableFoodAutomation) return;
             if (forced) return; // 플레이어가 강제 지시한 경우 무시
 
-            var manager = FoodManager.Instance;
+            var manager = RimAIManager.Instance;
             if (manager == null) return;
 
-            var decision = manager.GetDecision(pawn.Map);
+            var foodSubsystem = manager.GetSubsystem<FoodSubsystem>();
+            if (foodSubsystem == null) return;
+
+            var decision = foodSubsystem.GetDecision(pawn.Map);
             if (decision == null) return;
 
             // 요리 작업 여부는 실제 Job 할당 시점에 판단하기 어려우므로,
@@ -148,10 +161,13 @@ namespace RimAI.Food.Patches
             var pawn = __instance.pawn;
             if (pawn?.Map == null) return;
 
-            var manager = FoodManager.Instance;
+            var manager = RimAIManager.Instance;
             if (manager == null) return;
 
-            var decision = manager.GetDecision(pawn.Map);
+            var foodSubsystem = manager.GetSubsystem<FoodSubsystem>();
+            if (foodSubsystem == null) return;
+
+            var decision = foodSubsystem.GetDecision(pawn.Map);
             if (decision == null) return;
 
             // 작업 타입에 따라 우선순위 부스트

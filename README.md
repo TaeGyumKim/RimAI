@@ -14,7 +14,7 @@ RimAI는 RimWorld의 기본 AI 위에 올라가는 **상위 의사결정 레이�
 - 위기 상황 자동 대응
 
 ### 현재 버전
-**v0.2.0 (알파)** - 2단계: 식량/농사 자동화 시스템 구현
+**v0.3.0 (알파)** - 3단계: 중앙 브레인 + 건설/연구 자동화
 
 ## 폴더 구조
 
@@ -26,21 +26,32 @@ RimAI/
 │   └── RimAI.dll              # (빌드 후 생성됨)
 ├── Docs/                      # 설계 문서
 │   ├── RimWorld-WorkSystem-Overview.md
-│   └── Stage2-FoodAutomation-Design.md
+│   ├── Stage2-FoodAutomation-Design.md
+│   └── Stage3-CentralBrain-Architecture.md
 ├── Source/                    # C# 소스 코드
 │   └── RimAI/
 │       ├── RimAI.csproj       # C# 프로젝트 파일
 │       ├── RimAI_Mod.cs       # Harmony 부트스트랩 클래스
 │       ├── Core/              # 코어 시스템
-│       │   └── ColonyScanner.cs
-│       └── Food/              # 식량 자동화 시스템
-│           ├── FoodState.cs   # 식량 상태 데이터 모델
-│           ├── FoodAnalyzer.cs # 식량 상태 분석기
-│           ├── FoodDecisionEngine.cs # 의사결정 엔진
-│           ├── FoodManager.cs # 중앙 관리자
-│           └── Patches/       # Harmony 패치
-│               ├── GamePatches.cs
-│               └── WorkGiverPatches.cs
+│       │   ├── IRimAISubsystem.cs    # 서브시스템 인터페이스
+│       │   ├── RimAIAction.cs        # 액션 데이터 구조
+│       │   ├── RimAIManager.cs       # 중앙 브레인
+│       │   ├── ColonyScanner.cs      # 콜로니 스캐너
+│       │   └── Patches/
+│       │       └── GamePatches.cs    # 게임 초기화 패치
+│       ├── Food/              # 식량 자동화 서브시스템
+│       │   ├── FoodSubsystem.cs      # 식량 서브시스템
+│       │   ├── FoodState.cs          # 상태 데이터
+│       │   ├── FoodAnalyzer.cs       # 상태 분석기
+│       │   ├── FoodDecisionEngine.cs # 의사결정 엔진
+│       │   └── Patches/
+│       │       └── WorkGiverPatches.cs
+│       ├── Construction/      # 건설/확장 서브시스템
+│       │   ├── ConstructionSubsystem.cs
+│       │   ├── ConstructionState.cs
+│       │   └── ConstructionAnalyzer.cs
+│       └── Research/          # 연구 자동화 서브시스템
+│           └── ResearchSubsystem.cs
 ├── Defs/                      # XML 정의 파일 (향후 추가)
 ├── .gitignore                 # Git 제외 파일 목록
 └── README.md                  # 이 파일
@@ -142,23 +153,31 @@ mklink /D "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\RimAI" "C
 - [x] Harmony 부트스트랩 코드 작성
 - [x] 게임 로드 시 콜로니 상태 스캔 및 로그 출력
 
-### ✅ 2단계: 식량 자동화 (완료 - 현재)
+### ✅ 2단계: 식량 자동화 (완료)
 - [x] 식량 저장량 모니터링 시스템 (FoodAnalyzer)
 - [x] 농사 작업 우선순위 자동 조정 (FoodDecisionEngine)
 - [x] 사냥 작업 자동 지시
 - [x] 요리 작업 자동 관리
 - [x] 계절별 농사 대응 (겨울 대비, 봄 파종)
 - [x] WorkGiver 패치를 통한 작업 제어
-- [ ] 채집 작업 자동 지시 (2.1단계에서 추가 예정)
 
-### 📋 3단계: 건설 및 생산 자동화 (예정)
-- [ ] 건설 우선순위 자동 결정
+### ✅ 3단계: 중앙 브레인 + 건설/연구 자동화 (완료 - 현재)
+- [x] 중앙 브레인 시스템 (RimAIManager) 구축
+- [x] 서브시스템 아키텍처 (IRimAISubsystem 인터페이스)
+- [x] 액션 기반 의사결정 (RimAIAction 데이터 구조)
+- [x] 우선순위 조정 및 충돌 해결 시스템
+- [x] 건설 서브시스템 (침대, 주방, 방어 시설 자동 구축)
+- [x] 연구 서브시스템 (휴리스틱 기반 연구 자동 선택)
+- [x] 쿨다운 시스템 (방치 모드 최적화)
+- [ ] 건설 실제 청사진 배치 로직 (4단계에서 완성)
+- [ ] 채집 작업 자동 지시 (4단계에서 추가)
+
+### 📋 4단계: 건설 완성 및 생산 자동화 (예정)
+- [ ] 실제 청사진 배치 구현
+- [ ] 적절한 위치 찾기 알고리즘
+- [ ] 방 레이아웃 플래너
 - [ ] 생산 작업 자동 계획
 - [ ] 자원 관리 시스템
-
-### 📋 4단계: 연구 자동화 (예정)
-- [ ] 연구 우선순위 자동 결정
-- [ ] 기술 트리 최적화
 
 ### 📋 5단계: 위기 대응 (예정)
 - [ ] 전투 상황 자동 대응
