@@ -4,6 +4,7 @@ using RimAI.Core;
 using RimAI.Settings;
 using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace RimAI.Equipment
 {
