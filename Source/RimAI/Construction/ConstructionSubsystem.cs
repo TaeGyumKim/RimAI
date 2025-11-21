@@ -14,7 +14,7 @@ namespace RimAI.Construction
     {
         // 쿨다운 관리 (맵별)
         private Dictionary<Map, int> lastConstructionTick = new Dictionary<Map, int>();
-        private const int CONSTRUCTION_COOLDOWN = 2500; // 약 40초 - 더 적극적으로 건설
+        private const int CONSTRUCTION_COOLDOWN = 600; // 10초 - 매우 적극적으로 건설
 
         // 맵별 상태 캐시
         private Dictionary<Map, ColonyConstructionState> mapStates = new Dictionary<Map, ColonyConstructionState>();
@@ -24,7 +24,7 @@ namespace RimAI.Construction
 
         public ConstructionSubsystem()
         {
-            baseUpdateInterval = 600; // 10초마다 업데이트
+            baseUpdateInterval = 120; // 2초마다 업데이트
         }
 
         public override void Initialize()

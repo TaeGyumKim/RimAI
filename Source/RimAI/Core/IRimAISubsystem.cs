@@ -72,8 +72,8 @@ namespace RimAI.Core
     public abstract class RimAISubsystemBase : IRimAISubsystem
     {
         protected int tickCounter = 0;
-        protected int baseUpdateInterval = 300; // 기본 5초
-        protected int updateInterval = 300;
+        protected int baseUpdateInterval = 60; // 기본 1초 (더 빠른 반응)
+        protected int updateInterval = 60;
         private bool _enabled = true;
 
         public abstract string Name { get; }
