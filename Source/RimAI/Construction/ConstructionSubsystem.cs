@@ -127,21 +127,183 @@ namespace RimAI.Construction
         {
             if (action.TargetMap == null) return;
 
-            // 실제 건설 로직
-            // 현재는 로그만 출력하고, 향후 확장 시 실제 청사진 배치 구현
-            LogInfo(action.Description);
+            Map map = action.TargetMap;
+            bool success = false;
 
-            // TODO: 실제 건설 구현
-            // - 적절한 위치 찾기 (빈 공간, 접근 가능한 곳)
-            // - GenConstruct.PlaceBlueprintForBuild() 사용
-            // - 자원 확인
-
-            // 쿨다운 설정
-            if (action.Type == RimAIActionType.ConstructBuilding ||
-                action.Type == RimAIActionType.PlaceBlueprint)
+            try
             {
-                lastConstructionTick[action.TargetMap] = Find.TickManager.TicksGame;
+                // 액션 타입별 처리
+                if (action.Type == RimAIActionType.ConstructBuilding)
+                {
+                    success = ExecuteConstructBuilding(map, action);
+                }
+                else if (action.Type == RimAIActionType.Other && action.Description.Contains("창고"))
+                {
+                    success = ExecuteCreateStorage(map, action);
+                }
+
+                // 성공 시 쿨다운 설정
+                if (success)
+                {
+                    lastConstructionTick[map] = Find.TickManager.TicksGame;
+                    LogInfo($"✓ {action.Description}");
+                }
             }
+            catch (System.Exception ex)
+            {
+                LogError($"건설 실행 중 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 건물 건설 실행
+        /// </summary>
+        private bool ExecuteConstructBuilding(Map map, RimAIAction action)
+        {
+            ThingDef buildingDef = action.TargetThingDef;
+
+            // Def가 없으면 설명에서 추론
+            if (buildingDef == null)
+            {
+                if (action.Description.Contains("침대"))
+                    buildingDef = ThingDefOf.Bed;
+                else if (action.Description.Contains("주방") || action.Description.Contains("요리"))
+                    buildingDef = ThingDefOf.Stove;
+                else if (action.Description.Contains("샌드백"))
+                    buildingDef = ThingDefOf.Sandbags;
+                else if (action.Description.Contains("바리케이드"))
+                    buildingDef = ThingDefOf.Barricade;
+                else
+                    return false; // 알 수 없는 건물
+            }
+
+            // 플레이 스타일 반영
+            int count = GetBuildCountByPlayStyle(buildingDef);
+
+            int successCount = 0;
+            for (int i = 0; i < count; i++)
+            {
+                // 위치 찾기
+                BuildingType type = GetBuildingType(buildingDef);
+                IntVec2 size = GetBuildingSize(buildingDef);
+
+                IntVec3? location = BuildingPlacer.FindBestLocation(
+                    map, buildingDef, size, type);
+
+                if (location == null)
+                {
+                    LogWarning($"건설 위치를 찾을 수 없음: {buildingDef.label}");
+                    continue;
+                }
+
+                // 청사진 배치
+                BlueprintResult result = BlueprintExecutor.PlaceSingleBuilding(
+                    map, buildingDef, location.Value);
+
+                if (result.Success)
+                {
+                    successCount++;
+
+                    // 스토리 로그
+                    StoryLogger.Construction.InfrastructurePlan(buildingDef.label);
+                }
+                else
+                {
+                    LogWarning($"청사진 배치 실패: {result.ErrorMessage}");
+                }
+            }
+
+            return successCount > 0;
+        }
+
+        /// <summary>
+        /// 창고 구역 생성 실행
+        /// </summary>
+        private bool ExecuteCreateStorage(Map map, RimAIAction action)
+        {
+            // 위치 찾기 (넓은 공간)
+            IntVec2 size = new IntVec2(5, 5);
+            IntVec3? location = BuildingPlacer.FindBestLocation(
+                map, null, size, BuildingType.Storage);
+
+            if (location == null)
+            {
+                LogWarning("창고 위치를 찾을 수 없음");
+                return false;
+            }
+
+            // 스톡파일 구역 생성
+            BlueprintResult result = BlueprintExecutor.CreateStockpileZone(
+                map, location.Value, size);
+
+            if (result.Success)
+            {
+                StoryLogger.Construction.InfrastructurePlan("창고 구역");
+                return true;
+            }
+            else
+            {
+                LogWarning($"창고 구역 생성 실패: {result.ErrorMessage}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 건물 타입 추론
+        /// </summary>
+        private BuildingType GetBuildingType(ThingDef def)
+        {
+            if (def == ThingDefOf.Bed || def == ThingDefOf.DoubleBed)
+                return BuildingType.Bedroom;
+            else if (def == ThingDefOf.Table || def == ThingDefOf.TableShort)
+                return BuildingType.DiningRoom;
+            else if (def == ThingDefOf.Sandbags || def == ThingDefOf.Barricade)
+                return BuildingType.Defense;
+            else
+                return BuildingType.Infrastructure;
+        }
+
+        /// <summary>
+        /// 건물 크기 추론
+        /// </summary>
+        private IntVec2 GetBuildingSize(ThingDef def)
+        {
+            if (def.size.x > 0 && def.size.z > 0)
+                return def.size;
+
+            // 기본값
+            return new IntVec2(1, 1);
+        }
+
+        /// <summary>
+        /// 플레이 스타일에 따른 건설 개수
+        /// </summary>
+        private int GetBuildCountByPlayStyle(ThingDef def)
+        {
+            var style = RimAI_Mod.Settings.playStyle;
+
+            // 침대
+            if (def == ThingDefOf.Bed)
+            {
+                if (style == Settings.RimAIPlayStyle.Nomadic)
+                    return 1; // 최소한만
+                else
+                    return 2; // 기본 2개
+            }
+
+            // 방어 시설
+            if (def == ThingDefOf.Sandbags || def == ThingDefOf.Barricade)
+            {
+                if (style == Settings.RimAIPlayStyle.Fortress)
+                    return 5; // 방어 중시
+                else if (style == Settings.RimAIPlayStyle.Nomadic)
+                    return 1; // 최소한
+                else
+                    return 3; // 기본
+            }
+
+            // 기타
+            return 1;
         }
 
         /// <summary>
@@ -179,6 +341,19 @@ namespace RimAI.Construction
             }
 
             return info;
+        }
+
+        /// <summary>
+        /// 맵 데이터 정리 (메모리 누수 방지)
+        /// </summary>
+        public override void CleanupMap(Map map)
+        {
+            if (map == null) return;
+
+            mapStates.Remove(map);
+            lastConstructionTick.Remove(map);
+
+            LogInfo($"맵 {map.Index} 데이터 정리 완료");
         }
     }
 }
