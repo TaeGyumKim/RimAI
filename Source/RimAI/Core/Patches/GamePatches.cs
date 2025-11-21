@@ -4,6 +4,7 @@ using RimAI.Construction;
 using RimAI.Research;
 using RimAI.Production;
 using RimAI.Medical;
+using RimAI.Trading;
 using Verse;
 
 namespace RimAI.Core.Patches
@@ -66,10 +67,13 @@ namespace RimAI.Core.Patches
             // 4. 건설 서브시스템 (우선순위: 50)
             manager.RegisterSubsystem(new ConstructionSubsystem());
 
-            // 5. 생산 서브시스템 (우선순위: 30)
+            // 5. 무역 서브시스템 (우선순위: 40)
+            manager.RegisterSubsystem(new TradingSubsystem());
+
+            // 6. 생산 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ProductionSubsystem());
 
-            // 6. 연구 서브시스템 (우선순위: 30)
+            // 7. 연구 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ResearchSubsystem());
         }
     }

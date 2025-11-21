@@ -17,6 +17,9 @@ namespace RimAI.Core
         /// <summary>건물 건설 지시</summary>
         ConstructBuilding,
 
+        /// <summary>일반 건설 작업</summary>
+        Construction,
+
         /// <summary>연구 프로젝트 선택</summary>
         SelectResearch,
 
@@ -37,6 +40,18 @@ namespace RimAI.Core
 
         /// <summary>Bill 삭제</summary>
         DeleteBill,
+
+        /// <summary>일반 생산 작업</summary>
+        Production,
+
+        /// <summary>무역 권장</summary>
+        Trade,
+
+        /// <summary>카라반 파견</summary>
+        Caravan,
+
+        /// <summary>농업 작업 (파종/수확/재배)</summary>
+        Farming,
 
         /// <summary>기타</summary>
         Other

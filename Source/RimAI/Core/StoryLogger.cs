@@ -463,6 +463,82 @@ namespace RimAI.Core
         }
 
         /// <summary>
+        /// 무역 관련 스토리 로그
+        /// </summary>
+        public static class Trading
+        {
+            public static void TraderArrived()
+            {
+                Log("상인이 도착했습니다! 필요한 물자를 구매할 기회입니다.");
+            }
+
+            public static void CriticalPurchase(int shortageCount)
+            {
+                Log($"긴급 구매 필요! {shortageCount}종의 필수 자원이 부족합니다.");
+            }
+
+            public static void SellingSurplus(int value)
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Nomadic)
+                {
+                    Log($"초과 물자를 판매합니다. 예상 수익: {value} 실버. 가볍게 이동하겠습니다.");
+                }
+                else
+                {
+                    Log($"초과 물자를 판매합니다. 예상 수익: {value} 실버.");
+                }
+            }
+
+            public static void CaravanRecommended(string destination)
+            {
+                Log($"카라반 파견을 권장합니다. 목적지: {destination}");
+            }
+
+            public static void CaravanDeparted(int colonists, string destination)
+            {
+                Log($"카라반 출발! {colonists}명이 {destination}(으)로 향합니다.");
+            }
+
+            public static void CaravanReturned(int profit)
+            {
+                if (profit > 0)
+                {
+                    Log($"카라반 귀환! 순이익: {profit} 실버. 성공적인 교역이었습니다.");
+                }
+                else
+                {
+                    Log($"카라반이 돌아왔습니다.");
+                }
+            }
+
+            public static void EndgamePriority(string resourceType)
+            {
+                Log($"엔딩 준비! {resourceType} 확보를 최우선으로 합니다.");
+            }
+
+            public static void OrbitalTraderDetected()
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Researcher)
+                {
+                    Log("궤도 무역선 감지! 첨단 부품과 연구 자료를 구매할 기회입니다.");
+                }
+                else
+                {
+                    Log("궤도 무역선이 궤도에 들어왔습니다. 무선 통신으로 거래 가능합니다.");
+                }
+            }
+
+            public static void ResourceShortage(string resourceName)
+            {
+                Log($"{resourceName} 부족! 다음 상인 방문 시 구매를 우선시합니다.");
+            }
+        }
+
+        /// <summary>
         /// 일반 스토리 이벤트
         /// </summary>
         public static class General
