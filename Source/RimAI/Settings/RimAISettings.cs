@@ -72,6 +72,12 @@ namespace RimAI.Settings
         // === 프리셋 ===
         public RimAIPreset currentPreset = RimAIPreset.FullAuto;
 
+        // === 플레이 스타일 (스토리 패턴) ===
+        public RimAIPlayStyle playStyle = RimAIPlayStyle.Balanced;
+
+        // === 스토리 로그 활성화 ===
+        public bool storyLoggingEnabled = true;
+
         /// <summary>
         /// 설정 저장
         /// </summary>
@@ -89,6 +95,8 @@ namespace RimAI.Settings
             Scribe_Values.Look(ref cinematicCameraEnabled, "cinematicCameraEnabled", true);
             Scribe_Values.Look(ref logLevel, "logLevel", LogLevel.Normal);
             Scribe_Values.Look(ref currentPreset, "currentPreset", RimAIPreset.FullAuto);
+            Scribe_Values.Look(ref playStyle, "playStyle", RimAIPlayStyle.Balanced);
+            Scribe_Values.Look(ref storyLoggingEnabled, "storyLoggingEnabled", true);
         }
 
         /// <summary>
@@ -236,6 +244,34 @@ namespace RimAI.Settings
                 default:
                     return 1.0f;
             }
+        }
+
+        /// <summary>
+        /// 플레이 스타일 적용 (프리셋과 별개로 작동)
+        /// </summary>
+        public void ApplyPlayStyle(RimAIPlayStyle style)
+        {
+            playStyle = style;
+            currentPreset = RimAIPreset.Custom; // 스타일 변경 시 프리셋은 Custom으로
+
+            // 스타일별로 개입 강도 자동 조정은 하지 않음
+            // 대신 서브시스템에서 playStyle을 참조하여 행동을 변경
+        }
+
+        /// <summary>
+        /// 현재 플레이 스타일의 서브시스템 우선순위 가져오기
+        /// </summary>
+        public (int combat, int food, int construction, int research) GetPlayStylePriorities()
+        {
+            return RimAIPlayStyleProfile.SubsystemWeights.GetWeights(playStyle);
+        }
+
+        /// <summary>
+        /// 스토리 로그 출력 여부
+        /// </summary>
+        public bool ShouldLogStory()
+        {
+            return storyLoggingEnabled && (int)logLevel >= (int)LogLevel.Normal;
         }
     }
 }

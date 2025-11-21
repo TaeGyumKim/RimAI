@@ -23,6 +23,10 @@ namespace RimAI.Settings
             DrawPresetButtons(listing, settings);
             listing.Gap(SECTION_GAP);
 
+            // === 플레이 스타일 ===
+            DrawPlayStyleSection(listing, settings);
+            listing.Gap(SECTION_GAP);
+
             // === 마스터 스위치 ===
             listing.CheckboxLabeled("전체 자동화 활성화", ref settings.masterEnabled,
                 "모든 RimAI 자동화 기능을 켜거나 끕니다.");
@@ -251,6 +255,102 @@ namespace RimAI.Settings
                     return "개발자용 디버그 정보까지 모두 출력합니다.";
                 default:
                     return "";
+            }
+        }
+
+        /// <summary>
+        /// 플레이 스타일 섹션 그리기
+        /// </summary>
+        private static void DrawPlayStyleSection(Listing_Standard listing, RimAISettings settings)
+        {
+            DrawSectionHeader(listing, "플레이 스타일 (스토리 패턴)");
+
+            // 현재 스타일 표시
+            string currentStyleLabel = GetPlayStyleLabel(settings.playStyle);
+            listing.Label($"현재 스타일: {currentStyleLabel}");
+
+            // 스타일 설명
+            string description = RimAIPlayStyleProfile.GetDescription(settings.playStyle);
+            var descRect = listing.GetRect(50f);
+            Widgets.Label(descRect, description);
+            listing.Gap(5f);
+
+            // 스타일 버튼 (2줄)
+            var rect1 = listing.GetRect(35f);
+            var buttonWidth = rect1.width / 3f - 5f;
+
+            // 첫 번째 줄: Balanced, Fortress, Agricultural
+            DrawPlayStyleButton(new Rect(rect1.x, rect1.y, buttonWidth, rect1.height),
+                RimAIPlayStyle.Balanced, settings);
+            DrawPlayStyleButton(new Rect(rect1.x + buttonWidth + 6.67f, rect1.y, buttonWidth, rect1.height),
+                RimAIPlayStyle.Fortress, settings);
+            DrawPlayStyleButton(new Rect(rect1.x + (buttonWidth + 6.67f) * 2, rect1.y, buttonWidth, rect1.height),
+                RimAIPlayStyle.Agricultural, settings);
+
+            listing.Gap(5f);
+
+            // 두 번째 줄: Nomadic, Researcher
+            var rect2 = listing.GetRect(35f);
+            DrawPlayStyleButton(new Rect(rect2.x, rect2.y, buttonWidth, rect2.height),
+                RimAIPlayStyle.Nomadic, settings);
+            DrawPlayStyleButton(new Rect(rect2.x + buttonWidth + 6.67f, rect2.y, buttonWidth, rect2.height),
+                RimAIPlayStyle.Researcher, settings);
+
+            listing.Gap(10f);
+
+            // 스토리 로그 토글
+            listing.CheckboxLabeled("스토리 로그 활성화", ref settings.storyLoggingEnabled,
+                "의사결정을 자연스러운 한국어로 로그에 출력합니다. 관람 경험을 향상시킵니다.");
+        }
+
+        /// <summary>
+        /// 플레이 스타일 버튼 그리기
+        /// </summary>
+        private static void DrawPlayStyleButton(Rect rect, RimAIPlayStyle style, RimAISettings settings)
+        {
+            bool isSelected = settings.playStyle == style;
+
+            if (isSelected)
+            {
+                GUI.color = new Color(0.6f, 0.8f, 1f); // 하늘색
+            }
+
+            if (Widgets.ButtonText(rect, GetPlayStyleLabel(style)))
+            {
+                settings.ApplyPlayStyle(style);
+
+                // 스토리 로그
+                RimAI.Core.StoryLogger.General.PlayStyleActivated(style);
+            }
+
+            GUI.color = Color.white;
+
+            if (Mouse.IsOver(rect))
+            {
+                string tooltip = RimAIPlayStyleProfile.GetDescription(style);
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+        }
+
+        /// <summary>
+        /// 플레이 스타일 라벨 가져오기
+        /// </summary>
+        private static string GetPlayStyleLabel(RimAIPlayStyle style)
+        {
+            switch (style)
+            {
+                case RimAIPlayStyle.Balanced:
+                    return "균형 발전";
+                case RimAIPlayStyle.Fortress:
+                    return "요새 콜로니";
+                case RimAIPlayStyle.Agricultural:
+                    return "농업 제국";
+                case RimAIPlayStyle.Nomadic:
+                    return "유목 생존";
+                case RimAIPlayStyle.Researcher:
+                    return "기술 연구소";
+                default:
+                    return "?";
             }
         }
     }

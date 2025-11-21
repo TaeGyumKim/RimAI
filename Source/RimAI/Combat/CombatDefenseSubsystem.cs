@@ -165,6 +165,10 @@ namespace RimAI.Combat
 
                 LogWarning($"전투 시작! 위협 레벨: {state.CurrentThreatLevel}, 적: {state.TotalEnemies}명");
 
+                // 스토리 로그
+                StoryLogger.Combat.ThreatDetected(state.TotalEnemies, state.CurrentThreatLevel.ToString());
+                StoryLogger.Combat.CombatStart(state.CombatCapablePawns.Count, state.TotalEnemies);
+
                 // 카메라 이동 (전투 위치로)
                 CinematicCameraHelper.FocusOnCombat(map, state.ThreatCenter);
             }
@@ -187,6 +191,9 @@ namespace RimAI.Combat
             state.InCombat = false;
 
             LogInfo($"전투 종료! 지속시간: {state.CombatDurationSeconds:F1}초");
+
+            // 스토리 로그
+            StoryLogger.Combat.CombatVictory(state.CombatDurationSeconds);
 
             // 모든 폰 Undraft
             UndraftAllPawns(map);

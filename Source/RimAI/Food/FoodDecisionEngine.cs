@@ -1,4 +1,5 @@
 using System.Text;
+using RimAI.Core;
 using Verse;
 
 namespace RimAI.Food
@@ -41,6 +42,9 @@ namespace RimAI.Food
                     decision.HuntingPriority = FoodWorkPriority.Critical;
                     decision.HarvestingPriority = FoodWorkPriority.Critical;
                     decision.ForagingPriority = FoodWorkPriority.Critical;
+
+                    // 스토리 로그
+                    StoryLogger.Food.Emergency(state.DaysUntilStarvation);
                     break;
 
                 case 2: // 경고 (3일 미만)
@@ -49,6 +53,9 @@ namespace RimAI.Food
                     decision.HuntingPriority = FoodWorkPriority.High;
                     decision.HarvestingPriority = FoodWorkPriority.High;
                     decision.ForagingPriority = FoodWorkPriority.Normal;
+
+                    // 스토리 로그
+                    StoryLogger.Food.Warning(state.DaysUntilStarvation);
                     break;
 
                 case 1: // 주의 (7일 미만)
@@ -63,6 +70,12 @@ namespace RimAI.Food
                     decision.CookingPriority = FoodWorkPriority.Low;
                     decision.HuntingPriority = FoodWorkPriority.Low;
                     decision.HarvestingPriority = FoodWorkPriority.Normal;
+
+                    // 식량 과잉 시 스토리 로그 (10일 이상)
+                    if (state.DaysUntilStarvation > 10f)
+                    {
+                        StoryLogger.Food.Surplus();
+                    }
                     break;
             }
 
@@ -144,11 +157,20 @@ namespace RimAI.Food
                 reasoning.AppendLine("→ 겨울 임박! 수확 및 저장 최우선");
                 decision.HarvestingPriority = FoodWorkPriority.Critical;
                 decision.CookingPriority = BoostPriority(decision.CookingPriority);
+
+                // 스토리 로그
+                StoryLogger.Food.WinterPreparation(state.DaysUntilWinter);
             }
             else if (state.DaysUntilWinter > 0 && state.DaysUntilWinter <= 15)
             {
                 reasoning.AppendLine("→ 겨울 대비 필요");
                 decision.HarvestingPriority = BoostPriority(decision.HarvestingPriority);
+
+                // 스토리 로그 (15일 때만)
+                if (state.DaysUntilWinter == 15)
+                {
+                    StoryLogger.Food.WinterPreparation(state.DaysUntilWinter);
+                }
             }
 
             // 봄에는 파종 우선순위 상승
@@ -156,6 +178,15 @@ namespace RimAI.Food
             {
                 reasoning.AppendLine("→ 봄: 파종 적기");
                 decision.SowingPriority = BoostPriority(decision.SowingPriority);
+
+                // 스토리 로그
+                StoryLogger.Food.SpringSowing();
+            }
+
+            // 수확 시즌
+            if (state.HarvestableCrops > state.ColonistCount * 5)
+            {
+                StoryLogger.Food.HarvestSeason();
             }
         }
 
