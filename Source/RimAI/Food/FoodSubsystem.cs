@@ -126,5 +126,18 @@ namespace RimAI.Food
 
             return $"[{Name}] {state}";
         }
+
+        /// <summary>
+        /// 맵 데이터 정리 (메모리 누수 방지)
+        /// </summary>
+        public override void CleanupMap(Map map)
+        {
+            if (map == null) return;
+
+            mapDecisions.Remove(map);
+            mapStates.Remove(map);
+
+            LogInfo($"맵 {map.Index} 데이터 정리 완료");
+        }
     }
 }

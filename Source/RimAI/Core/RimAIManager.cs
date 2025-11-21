@@ -340,6 +340,54 @@ namespace RimAI.Core
                     Log.Error($"[RimAI] {subsystem.Name} ExposeData 중 오류: {ex}");
                 }
             }
+
+            // 로드 후 유효하지 않은 맵 데이터 정리 (메모리 누수 방지)
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                CleanupInvalidMaps();
+            }
+        }
+
+        /// <summary>
+        /// 유효하지 않은 맵 데이터 정리 (메모리 누수 방지)
+        /// </summary>
+        private void CleanupInvalidMaps()
+        {
+            // pendingActions에서 유효하지 않은 맵 제거
+            var invalidMaps = new List<Map>();
+            foreach (var map in pendingActions.Keys)
+            {
+                if (map == null || map.Index < 0 || !Find.Maps.Contains(map))
+                {
+                    invalidMaps.Add(map);
+                }
+            }
+
+            foreach (var map in invalidMaps)
+            {
+                pendingActions.Remove(map);
+
+                // 모든 서브시스템에 맵 정리 통지
+                foreach (var subsystem in subsystems)
+                {
+                    try
+                    {
+                        subsystem.CleanupMap(map);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Log.Error($"[RimAI] {subsystem.Name} 맵 정리 중 오류: {ex}");
+                    }
+                }
+
+                Log.Message($"[RimAI] 맵 {map?.Index ?? -1} 데이터 정리 완료 (메모리 누수 방지)");
+            }
+
+            // ThreatAnalyzer 정적 캐시 완전 정리
+            if (invalidMaps.Count > 0)
+            {
+                Combat.ThreatAnalyzer.ClearCache();
+            }
         }
 
         /// <summary>

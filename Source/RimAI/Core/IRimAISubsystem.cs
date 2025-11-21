@@ -58,6 +58,11 @@ namespace RimAI.Core
         /// 디버그 정보 문자열
         /// </summary>
         string GetDebugInfo(Map map);
+
+        /// <summary>
+        /// 특정 맵 데이터 정리 (맵 언로드 시 호출, 메모리 누수 방지)
+        /// </summary>
+        void CleanupMap(Map map);
     }
 
     /// <summary>
@@ -183,6 +188,16 @@ namespace RimAI.Core
         protected void LogError(string message)
         {
             Log.Error($"[RimAI-{Name}] {message}");
+        }
+
+        /// <summary>
+        /// 특정 맵 데이터 정리 (메모리 누수 방지)
+        /// 서브시스템에서 오버라이드하여 맵별 캐시 정리
+        /// </summary>
+        public virtual void CleanupMap(Map map)
+        {
+            // 기본 구현: 아무것도 하지 않음
+            // 서브시스템에서 필요시 오버라이드
         }
     }
 }

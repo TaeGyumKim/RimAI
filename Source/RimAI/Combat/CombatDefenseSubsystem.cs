@@ -373,5 +373,22 @@ namespace RimAI.Combat
 
             return info;
         }
+
+        /// <summary>
+        /// 맵 데이터 정리 (메모리 누수 방지)
+        /// </summary>
+        public override void CleanupMap(Map map)
+        {
+            if (map == null) return;
+
+            mapThreatStates.Remove(map);
+            defensivePositions.Remove(map);
+            mapsInCombat.Remove(map);
+
+            // ThreatAnalyzer static 캐시 정리
+            ThreatAnalyzer.ClearMapCache(map);
+
+            LogInfo($"맵 {map.Index} 데이터 정리 완료");
+        }
     }
 }

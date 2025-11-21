@@ -6,6 +6,11 @@ namespace RimAI.Construction
 {
     /// <summary>
     /// 콜로니의 건설 상태를 분석
+    ///
+    /// 성능 최적화:
+    /// - 인프라 분석 단일 순회 (3번 → 1번)
+    /// - ResourceCounter 사용 (O(1) 조회)
+    /// - 조기 종료 추가
     /// </summary>
     public static class ConstructionAnalyzer
     {
@@ -55,20 +60,37 @@ namespace RimAI.Construction
             }
         }
 
+        /// <summary>
+        /// 인프라 분석 (최적화됨 - 단일 순회)
+        /// </summary>
         private static void AnalyzeInfrastructure(Map map, ColonyConstructionState state)
         {
-            // 주방 확인 (요리대)
-            state.HasKitchen = map.listerBuildings.allBuildingsColonist
-                .Any(b => b.def.building?.isMealSource == true);
+            // 초기화
+            state.HasKitchen = false;
+            state.HasWorkshop = false;
+            state.HasResearchBench = false;
 
-            // 작업장 확인 (제작대)
-            state.HasWorkshop = map.listerBuildings.allBuildingsColonist
-                .Any(b => b.def.defName.Contains("TableMachining") ||
-                          b.def.defName.Contains("Workbench"));
+            // 단일 순회로 모든 건물 체크 (이전: 3번 순회 → 현재: 1번)
+            foreach (var building in map.listerBuildings.allBuildingsColonist)
+            {
+                // 주방 확인 (요리대)
+                if (!state.HasKitchen && building.def.building?.isMealSource == true)
+                    state.HasKitchen = true;
 
-            // 연구대 확인
-            state.HasResearchBench = map.listerBuildings.allBuildingsColonist
-                .Any(b => b.def.defName.Contains("ResearchBench"));
+                // 작업장 확인 (제작대)
+                if (!state.HasWorkshop &&
+                    (building.def.defName.Contains("TableMachining") ||
+                     building.def.defName.Contains("Workbench")))
+                    state.HasWorkshop = true;
+
+                // 연구대 확인
+                if (!state.HasResearchBench && building.def.defName.Contains("ResearchBench"))
+                    state.HasResearchBench = true;
+
+                // 조기 종료: 모두 찾았으면 더 이상 순회하지 않음
+                if (state.HasKitchen && state.HasWorkshop && state.HasResearchBench)
+                    break;
+            }
 
             // 창고 확인 (스톡파일 구역)
             state.HasStorageRoom = map.zoneManager.AllZones
@@ -122,30 +144,25 @@ namespace RimAI.Construction
             state.ActiveConstructions = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingFrame).Count;
         }
 
+        /// <summary>
+        /// 자원 분석 (최적화됨 - ResourceCounter 사용)
+        ///
+        /// ResourceCounter는 내부적으로 자원 수를 관리하므로 O(1) 조회 가능
+        /// 이전: HaulableEver 순회 (수천 개 아이템) → 현재: 직접 조회 (즉시)
+        /// </summary>
         private static void AnalyzeResources(Map map, ColonyConstructionState state)
         {
-            state.AvailableWood = 0;
-            state.AvailableSteel = 0;
+            // ResourceCounter 사용 (O(1) 조회)
+            state.AvailableWood = map.resourceCounter.GetCount(ThingDefOf.WoodLog);
+            state.AvailableSteel = map.resourceCounter.GetCount(ThingDefOf.Steel);
+
+            // 돌은 여러 종류가 있으므로 합산
             state.AvailableStone = 0;
-
-            // 자원 스택 분석
-            var haulables = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver);
-
-            foreach (var thing in haulables)
-            {
-                if (thing.def.defName.Contains("Wood"))
-                {
-                    state.AvailableWood += thing.stackCount;
-                }
-                else if (thing.def.defName.Contains("Steel"))
-                {
-                    state.AvailableSteel += thing.stackCount;
-                }
-                else if (thing.def.IsStuff && thing.def.stuffProps?.categories?.Contains(StuffCategoryDefOf.Stony) == true)
-                {
-                    state.AvailableStone += thing.stackCount;
-                }
-            }
+            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksGranite);
+            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksLimestone);
+            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksMarble);
+            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSandstone);
+            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSlate);
         }
     }
 }

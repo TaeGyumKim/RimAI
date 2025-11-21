@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -7,12 +9,20 @@ namespace RimAI.Food
 {
     /// <summary>
     /// 콜로니의 식량 상태를 분석하는 클래스
+    ///
+    /// 성능 최적화:
+    /// - 농장 분석 샘플링 (전체 대신 일부만 검사)
+    /// - GetStatValue() → def.GetStatValueAbstract() 사용
+    /// - 조기 종료 추가
     /// </summary>
     public static class FoodAnalyzer
     {
         // 폰 하루 평균 영양분 소비량 (게임 내부 값 참조)
         private const float PAWN_DAILY_NUTRITION = 1.6f;
         private const float ANIMAL_DAILY_NUTRITION = 0.8f; // 평균값
+
+        // 농장 샘플링 최대 개수
+        private const int MAX_FARM_SAMPLES_PER_ZONE = 100; // Zone당 최대 100개 셀만 검사
 
         /// <summary>
         /// 특정 맵의 식량 상태를 분석
@@ -30,7 +40,7 @@ namespace RimAI.Food
             // 3. 소비량 및 생존 일수 계산
             CalculateConsumption(state);
 
-            // 4. 농장 상태 분석
+            // 4. 농장 상태 분석 (최적화됨)
             AnalyzeFarms(map, state);
 
             // 5. 환경 정보 분석
@@ -43,7 +53,7 @@ namespace RimAI.Food
         }
 
         /// <summary>
-        /// 식량 저장량 분석
+        /// 식량 저장량 분석 (최적화됨)
         /// </summary>
         private static void AnalyzeFoodStorage(Map map, ColonyFoodState state)
         {
@@ -57,30 +67,32 @@ namespace RimAI.Food
 
             foreach (var thing in foodThings)
             {
-                if (thing.def.IsIngestible)
+                // 조기 종료: 섭취 불가능하면 스킵
+                if (!thing.def.IsIngestible)
+                    continue;
+
+                // GetStatValue() 대신 def에서 직접 가져오기 (더 빠름)
+                float nutrition = thing.def.GetStatValueAbstract(StatDefOf.Nutrition) * thing.stackCount;
+
+                state.TotalNutrition += nutrition;
+
+                // 식량 타입별 분류 (조기 분류)
+                if (thing.def.IsMeat || thing.def == ThingDefOf.Meat_Human)
                 {
-                    float nutrition = thing.GetStatValue(StatDefOf.Nutrition) * thing.stackCount;
-
-                    state.TotalNutrition += nutrition;
-
-                    // 식량 타입별 분류
-                    if (thing.def.IsMeat || thing.def == ThingDefOf.Meat_Human)
-                    {
-                        state.RawFoodNutrition += nutrition;
-                    }
-                    else if (thing.def.IsCorpse)
-                    {
-                        // 시체는 영양분으로 간주하지 않음 (인육 제외)
-                        state.TotalNutrition -= nutrition;
-                    }
-                    else if (thing.def.ingestible?.preferability >= FoodPreferability.MealAwful)
-                    {
-                        state.MealNutrition += nutrition;
-                    }
-                    else if (thing is Plant plant && plant.HarvestableNow)
-                    {
-                        state.CropNutrition += nutrition;
-                    }
+                    state.RawFoodNutrition += nutrition;
+                }
+                else if (thing.def.IsCorpse)
+                {
+                    // 시체는 영양분으로 간주하지 않음 (인육 제외)
+                    state.TotalNutrition -= nutrition;
+                }
+                else if (thing.def.ingestible?.preferability >= FoodPreferability.MealAwful)
+                {
+                    state.MealNutrition += nutrition;
+                }
+                else if (thing is Plant plant && plant.HarvestableNow)
+                {
+                    state.CropNutrition += nutrition;
                 }
             }
         }
@@ -117,7 +129,9 @@ namespace RimAI.Food
         }
 
         /// <summary>
-        /// 농장 상태 분석
+        /// 농장 상태 분석 (샘플링 최적화)
+        ///
+        /// 성능 개선: 큰 농장은 전체를 검사하지 않고 샘플링으로 추정
         /// </summary>
         private static void AnalyzeFarms(Map map, ColonyFoodState state)
         {
@@ -133,26 +147,62 @@ namespace RimAI.Food
 
             foreach (var zone in zones)
             {
-                foreach (var cell in zone.Cells)
-                {
-                    state.TotalFarmTiles++;
+                int totalCells = zone.Cells.Count();
 
+                // 조기 종료: 농장이 비어있으면 스킵
+                if (totalCells == 0)
+                    continue;
+
+                state.TotalFarmTiles += totalCells;
+
+                // 샘플링 방식: 큰 농장은 일부만 검사하고 비율로 추정
+                int sampleSize = Math.Min(totalCells, MAX_FARM_SAMPLES_PER_ZONE);
+                bool useSampling = totalCells > MAX_FARM_SAMPLES_PER_ZONE;
+
+                // 샘플 수집 (Take()는 지연 실행이므로 빠름)
+                var samplesToCheck = useSampling
+                    ? zone.Cells.Take(sampleSize)
+                    : zone.Cells;
+
+                int sownCount = 0;
+                int emptyCount = 0;
+                int harvestableCount = 0;
+
+                var plantDef = zone.GetPlantDefToGrow();
+
+                foreach (var cell in samplesToCheck)
+                {
                     var plant = cell.GetPlant(map);
 
-                    if (plant != null && zone.GetPlantDefToGrow() == plant.def)
+                    if (plant != null && plantDef == plant.def)
                     {
-                        state.SownTiles++;
+                        sownCount++;
 
                         if (plant.HarvestableNow)
                         {
-                            state.HarvestableCrops++;
+                            harvestableCount++;
                         }
                     }
                     else if (plant == null || !plant.sown)
                     {
                         // 빈 타일 또는 잡초만 있는 타일
-                        state.EmptyFarmTiles++;
+                        emptyCount++;
                     }
+                }
+
+                // 샘플링 사용 시 비율로 추정
+                if (useSampling)
+                {
+                    float ratio = (float)totalCells / sampleSize;
+                    state.SownTiles += (int)(sownCount * ratio);
+                    state.EmptyFarmTiles += (int)(emptyCount * ratio);
+                    state.HarvestableCrops += (int)(harvestableCount * ratio);
+                }
+                else
+                {
+                    state.SownTiles += sownCount;
+                    state.EmptyFarmTiles += emptyCount;
+                    state.HarvestableCrops += harvestableCount;
                 }
             }
         }
