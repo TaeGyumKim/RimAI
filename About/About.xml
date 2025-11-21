@@ -20,6 +20,7 @@ v0.9.0 (베타) - GA Optimization System</description>
     <supportedVersions>
         <li>1.4</li>
         <li>1.5</li>
+        <li>1.6</li>
     </supportedVersions>
     <modDependencies>
         <li>
@@ -35,5 +36,6 @@ v0.9.0 (베타) - GA Optimization System</description>
         <li>Ludeon.RimWorld.Royalty</li>
         <li>Ludeon.RimWorld.Ideology</li>
         <li>Ludeon.RimWorld.Biotech</li>
+        <li>Ludeon.RimWorld.Anomaly</li>
     </loadAfter>
 </ModMetaData>
