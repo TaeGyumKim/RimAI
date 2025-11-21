@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>RimAI</RootNamespace>
+    <AssemblyName>RimAI</AssemblyName>
+    <DebugType>portable</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\Assemblies\</OutputPath>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- RimWorld 게임 경로 설정 (사용자 환경에 맞게 수정 필요) -->
+  <PropertyGroup>
+    <!-- Windows 기본 Steam 경로 -->
+    <RimWorldWin>C:\Program Files (x86)\Steam\steamapps\common\RimWorld</RimWorldWin>
+    <!-- Linux 기본 Steam 경로 -->
+    <RimWorldLinux>$(HOME)/.steam/steam/steamapps/common/RimWorld</RimWorldLinux>
+    <!-- Mac 기본 Steam 경로 -->
+    <RimWorldMac>$(HOME)/Library/Application Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Contents/Resources/Data/Managed</RimWorldMac>
+  </PropertyGroup>
+
+  <!-- OS별 자동 경로 선택 -->
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <RimWorldPath>$(RimWorldWin)</RimWorldPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' And Exists('$(RimWorldLinux)')">
+    <RimWorldPath>$(RimWorldLinux)</RimWorldPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT' And Exists('$(RimWorldMac)')">
+    <RimWorldPath>$(RimWorldMac)</RimWorldPath>
+  </PropertyGroup>
+
+  <!-- RimWorld 어셈블리 참조 -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(RimWorldPath)\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Assemblies\0Harmony.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- NuGet 패키지 -->
+  <ItemGroup>
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.4104" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+  </ItemGroup>
+
+</Project>

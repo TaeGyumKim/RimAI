@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+    <name>RimAI - Auto Pilot</name>
+    <author>RimAI Team</author>
+    <packageId>rimai.autopilot</packageId>
+    <description>RimWorld 자동 플레이 모드. 식량, 건설, 연구, 생산, 의료, 전투 등 대부분의 결정을 자동으로 처리합니다.
+
+[주요 기능]
+- 자동 작업 우선순위 조정
+- 식량 및 농사 자동 관리
+- 건설 및 생산 자동 계획
+- 위기 상황 자동 대응
+
+[버전 정보]
+현재 버전: 0.1.0 (알파)
+1단계: 기본 스캐폴딩 및 코어 시스템</description>
+    <supportedVersions>
+        <li>1.4</li>
+        <li>1.5</li>
+    </supportedVersions>
+    <modDependencies>
+        <li>
+            <packageId>brrainz.harmony</packageId>
+            <displayName>Harmony</displayName>
+            <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+            <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
+        </li>
+    </modDependencies>
+    <loadAfter>
+        <li>brrainz.harmony</li>
+        <li>Ludeon.RimWorld</li>
+        <li>Ludeon.RimWorld.Royalty</li>
+        <li>Ludeon.RimWorld.Ideology</li>
+        <li>Ludeon.RimWorld.Biotech</li>
+    </loadAfter>
+</ModMetaData>
