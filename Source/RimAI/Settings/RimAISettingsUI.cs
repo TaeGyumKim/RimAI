@@ -11,14 +11,19 @@ namespace RimAI.Settings
     {
         private const float PRESET_BUTTON_HEIGHT = 40f;
         private const float SECTION_GAP = 20f;
+        private static Vector2 scrollPosition = Vector2.zero;
 
         /// <summary>
         /// 설정 창 그리기
         /// </summary>
         public static void DrawSettingsWindow(Rect inRect, RimAISettings settings)
         {
+            // 스크롤 뷰 (총 높이 약 600)
+            Rect viewRect = new Rect(0, 0, inRect.width - 20, 700);
+            scrollPosition = GUI.BeginScrollView(inRect, scrollPosition, viewRect);
+
             var listing = new Listing_Standard();
-            listing.Begin(inRect);
+            listing.Begin(viewRect);
 
             // === 프리셋 버튼 ===
             DrawPresetButtons(listing, settings);
@@ -68,6 +73,7 @@ namespace RimAI.Settings
             }
 
             listing.End();
+            GUI.EndScrollView();
         }
 
         /// <summary>
