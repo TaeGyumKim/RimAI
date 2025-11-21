@@ -159,7 +159,7 @@ namespace RimAI.Construction
             var thingsAtCell = map.thingGrid.ThingsListAt(cell);
             foreach (var thing in thingsAtCell)
             {
-                if (thing.def.IsBlueprint || thing.def.isFrame)
+                if (thing.def.IsBlueprint || thing.def.IsFrame)
                     return true;
             }
 

@@ -288,16 +288,16 @@ namespace RimAI.Combat
                 var colonists = map.mapPawns.FreeColonistsSpawned;
                 if (colonists.Any())
                 {
-                    float avgX = colonists.Average(p => p.Position.x);
-                    float avgZ = colonists.Average(p => p.Position.z);
+                    float avgX = (float)colonists.Average(p => p.Position.x);
+                    float avgZ = (float)colonists.Average(p => p.Position.z);
                     return new IntVec3((int)avgX, 0, (int)avgZ);
                 }
 
                 return map.Center;
             }
 
-            float x = buildings.Average(b => b.Position.x);
-            float z = buildings.Average(b => b.Position.z);
+            float x = (float)buildings.Average(b => b.Position.x);
+            float z = (float)buildings.Average(b => b.Position.z);
             return new IntVec3((int)x, 0, (int)z);
         }
 

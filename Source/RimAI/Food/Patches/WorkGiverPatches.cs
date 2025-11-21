@@ -158,7 +158,8 @@ namespace RimAI.Food.Patches
             if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
             if (__result == 0) return; // 비활성화된 작업은 건드리지 않음
 
-            var pawn = __instance.pawn;
+            // Pawn_WorkSettings.pawn은 private이므로 Traverse 사용
+            var pawn = HarmonyLib.Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
             if (pawn?.Map == null) return;
 
             var manager = RimAIManager.Instance;
@@ -177,7 +178,7 @@ namespace RimAI.Food.Patches
             {
                 boost = GetPriorityBoost(decision.SowingPriority, decision.HarvestingPriority);
             }
-            else if (w == WorkTypeDefOf.Cooking)
+            else if (w.defName == "Cooking")
             {
                 boost = GetPriorityBoost(decision.CookingPriority);
             }

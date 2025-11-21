@@ -301,11 +301,11 @@ namespace RimAI.Construction
             List<ThingDef> candidates = new List<ThingDef>
             {
                 ThingDefOf.WoodLog,
-                ThingDefOf.BlocksGranite,
+                DefDatabase<ThingDef>.GetNamedSilentFail("BlocksGranite"),
                 BlocksLimestoneDef,
-                ThingDefOf.BlocksMarble,
-                ThingDefOf.BlocksSandstone,
-                ThingDefOf.BlocksSlate,
+                DefDatabase<ThingDef>.GetNamedSilentFail("BlocksMarble"),
+                DefDatabase<ThingDef>.GetNamedSilentFail("BlocksSandstone"),
+                DefDatabase<ThingDef>.GetNamedSilentFail("BlocksSlate"),
                 ThingDefOf.Steel
             };
 

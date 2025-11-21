@@ -39,7 +39,7 @@ namespace RimAI.Combat
                 if (!isCinematicMode)
                 {
                     originalPosition = cameraDriver.MapPosition;
-                    originalZoom = cameraDriver.CellsVisible;
+                    originalZoom = cameraDriver.rootSize;
                     isCinematicMode = true;
                 }
 
@@ -92,7 +92,7 @@ namespace RimAI.Combat
                 var cameraDriver = Find.CameraDriver;
 
                 // 현재 줌 레벨 가져오기
-                float currentZoom = cameraDriver.CellsVisible;
+                float currentZoom = cameraDriver.rootSize;
 
                 // 목표 줌 레벨로 부드럽게 이동
                 // RimWorld 1.4/1.5에서는 CameraDriver.config.sizeRange를 사용하거나

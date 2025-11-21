@@ -113,7 +113,7 @@ namespace RimAI.Production
                     .FirstOrDefault(ap => ap.def.apparel.bodyPartGroups.Any(bpg =>
                         bpg.defName == "Torso"));
 
-                if (bodyArmor != null && bodyArmor.def.StatBaseDef.GetStatValueAbstract(StatDefOf.ArmorRating_Sharp) > 0.3f)
+                if (bodyArmor != null && bodyArmor.GetStatValue(StatDefOf.ArmorRating_Sharp) > 0.3f)
                 {
                     state.ColonistsWithArmor++;
                 }
@@ -130,7 +130,7 @@ namespace RimAI.Production
                         }
 
                         // 겨울옷 체크 (방한 > 0.3)
-                        if (apparel.def.StatBaseDef.GetStatValueAbstract(StatDefOf.Insulation_Cold) > 0.3f)
+                        if (apparel.GetStatValue(StatDefOf.Insulation_Cold) > 0.3f)
                         {
                             state.WinterClothes++;
                         }
@@ -157,19 +157,19 @@ namespace RimAI.Production
             foreach (var apparel in apparels)
             {
                 // 갑옷 (방어력 > 0.3)
-                if (apparel.def.StatBaseDef.GetStatValueAbstract(StatDefOf.ArmorRating_Sharp) > 0.3f)
+                if (apparel.GetStatValue(StatDefOf.ArmorRating_Sharp) > 0.3f)
                 {
                     state.Armors++;
                 }
 
                 // 겨울옷 체크
-                if (apparel.def.StatBaseDef.GetStatValueAbstract(StatDefOf.Insulation_Cold) > 0.3f)
+                if (apparel.GetStatValue(StatDefOf.Insulation_Cold) > 0.3f)
                 {
                     state.WinterClothes++;
                 }
 
                 // 여름옷 체크 (방열 > 0.3)
-                if (apparel.def.StatBaseDef.GetStatValueAbstract(StatDefOf.Insulation_Heat) > 0.3f)
+                if (apparel.GetStatValue(StatDefOf.Insulation_Heat) > 0.3f)
                 {
                     state.SummerClothes++;
                 }

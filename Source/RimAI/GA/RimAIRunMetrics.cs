@@ -28,7 +28,7 @@ namespace RimAI.GA
 
         // === 엔딩 정보 ===
         /// <summary>엔딩 이유 (enum으로 관리)</summary>
-        public EndReason EndReasonEnum { get; set; } = EndReason.Unknown;
+        public EndReason EndReasonEnum { get; set; } = GA.EndReason.Unknown;
 
         /// <summary>엔딩 도달 여부 (true = 성공, false = 전멸/실패)</summary>
         public bool Ended

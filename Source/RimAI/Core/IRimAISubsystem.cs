@@ -74,10 +74,11 @@ namespace RimAI.Core
         protected int tickCounter = 0;
         protected int baseUpdateInterval = 300; // 기본 5초
         protected int updateInterval = 300;
+        private bool _enabled = true;
 
         public abstract string Name { get; }
         public abstract int Priority { get; }
-        public bool Enabled { get; set; } = true;
+        public bool Enabled { get => _enabled; set => _enabled = value; }
 
         /// <summary>
         /// 설정 참조
@@ -103,7 +104,7 @@ namespace RimAI.Core
 
         public virtual void ExposeData()
         {
-            Scribe_Values.Look(ref Enabled, $"rimai_{Name}_enabled", true);
+            Scribe_Values.Look(ref _enabled, $"rimai_{Name}_enabled", true);
         }
 
         public virtual string GetDebugInfo(Map map)

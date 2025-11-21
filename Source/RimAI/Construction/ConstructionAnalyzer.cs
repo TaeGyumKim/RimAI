@@ -158,11 +158,11 @@ namespace RimAI.Construction
 
             // 돌은 여러 종류가 있으므로 합산 - DefDatabase로 안전하게 조회
             state.AvailableStone = 0;
-            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksGranite);
+            state.AvailableStone += GetResourceCount(map, "BlocksGranite");
             state.AvailableStone += GetResourceCount(map, "BlocksLimestone");
-            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksMarble);
-            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSandstone);
-            state.AvailableStone += map.resourceCounter.GetCount(ThingDefOf.BlocksSlate);
+            state.AvailableStone += GetResourceCount(map, "BlocksMarble");
+            state.AvailableStone += GetResourceCount(map, "BlocksSandstone");
+            state.AvailableStone += GetResourceCount(map, "BlocksSlate");
         }
 
         /// <summary>

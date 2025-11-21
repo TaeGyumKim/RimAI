@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RimAI.Core;
+using RimAI.Settings;
 using RimWorld;
 using Verse;
 
@@ -297,7 +298,7 @@ namespace RimAI.Construction
             // 침대
             if (def == ThingDefOf.Bed)
             {
-                if (style == Settings.RimAIPlayStyle.Nomadic)
+                if (style == RimAIPlayStyle.Nomadic)
                     return 1; // 최소한만
                 else
                     return 2; // 기본 2개
@@ -306,9 +307,9 @@ namespace RimAI.Construction
             // 방어 시설
             if (def == SandbagsDef || def == BarricadeDef)
             {
-                if (style == Settings.RimAIPlayStyle.Fortress)
+                if (style == RimAIPlayStyle.Fortress)
                     return 5; // 방어 중시
-                else if (style == Settings.RimAIPlayStyle.Nomadic)
+                else if (style == RimAIPlayStyle.Nomadic)
                     return 1; // 최소한
                 else
                     return 3; // 기본

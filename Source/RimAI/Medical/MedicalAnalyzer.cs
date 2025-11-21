@@ -85,7 +85,7 @@ namespace RimAI.Medical
                 }
 
                 // 현재 치료 중인지 확인
-                if (pawn.CurJob?.def == JobDefOf.TendPatient || pawn.CurJob?.def == JobDefOf.TendPatientUrgent)
+                if (pawn.CurJob?.def == JobDefOf.TendPatient)
                 {
                     state.PatientsBeingTreated++;
                 }
