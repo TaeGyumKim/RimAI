@@ -312,12 +312,8 @@ namespace RimAI.Zones
                 if (map.designationManager.DesignationOn(chunk, DesignationDefOf.Deconstruct) == null &&
                     map.designationManager.DesignationOn(chunk, DesignationDefOf.Haul) == null)
                 {
-                    // 슬래그 청크는 해체하여 철 획득
-                    if (chunk.def.IsSmeltable)
-                    {
-                        // Haul로 지정
-                        chunk.SetForbidden(false, false);
-                    }
+                    // 슬래그 청크 운반 활성화
+                    chunk.SetForbidden(false, false);
                 }
             }
         }
