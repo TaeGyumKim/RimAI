@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using RimAI.GA;
 using Verse;
 
 namespace RimAI.Core
@@ -24,6 +26,9 @@ namespace RimAI.Core
         private const int MAX_ACTION_LOG = 100;
 
         private int tickCounter = 0;
+
+        // GA 최적화용 Genome
+        private RimAIGenome currentGenome = RimAIGenome.CreateDefault();
 
         public RimAIManager(Game game)
         {
@@ -399,6 +404,91 @@ namespace RimAI.Core
             {
                 if (Current.Game == null) return null;
                 return Current.Game.GetComponent<RimAIManager>();
+            }
+        }
+
+        // === Genome 관리 ===
+
+        /// <summary>
+        /// 현재 Genome 가져오기
+        /// </summary>
+        public RimAIGenome GetCurrentGenome()
+        {
+            return currentGenome;
+        }
+
+        /// <summary>
+        /// Genome 설정 (외부에서 주입)
+        /// </summary>
+        public void SetGenome(RimAIGenome genome)
+        {
+            currentGenome = genome;
+            Log.Message($"[RimAI-GA] Genome 적용: {genome.GenomeId}");
+
+            // MetricsCollector에 Genome ID 전달
+            var collector = MetricsCollector.Instance;
+            if (collector != null)
+            {
+                var metrics = collector.GetCurrentMetrics();
+                metrics.GenomeId = genome.GenomeId;
+            }
+        }
+
+        /// <summary>
+        /// 파일에서 Genome 로드
+        /// </summary>
+        public void LoadGenomeFromFile(string filePath)
+        {
+            var genome = RimAIGenome.LoadFromFile(filePath);
+            SetGenome(genome);
+        }
+
+        /// <summary>
+        /// Genome 자동 로드 (설정 디렉토리에서)
+        /// </summary>
+        public void AutoLoadGenome()
+        {
+            try
+            {
+                string genomeDir = Path.Combine(GenFilePaths.ConfigFolderPath, "RimAI", "GA", "genomes");
+                string currentGenomePath = Path.Combine(genomeDir, "current.json");
+
+                if (File.Exists(currentGenomePath))
+                {
+                    LoadGenomeFromFile(currentGenomePath);
+                    Log.Message($"[RimAI-GA] Genome 자동 로드 완료: {currentGenome.GenomeId}");
+                }
+                else
+                {
+                    Log.Message($"[RimAI-GA] Genome 파일 없음, 기본값 사용");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Log.Error($"[RimAI-GA] Genome 자동 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 현재 Genome 저장
+        /// </summary>
+        public void SaveCurrentGenome()
+        {
+            try
+            {
+                string genomeDir = Path.Combine(GenFilePaths.ConfigFolderPath, "RimAI", "GA", "genomes");
+                Directory.CreateDirectory(genomeDir);
+
+                string filePath = Path.Combine(genomeDir, $"{currentGenome.GenomeId}.json");
+                currentGenome.SaveToFile(filePath);
+
+                // current.json으로도 저장 (자동 로드용)
+                string currentPath = Path.Combine(genomeDir, "current.json");
+                currentGenome.SaveToFile(currentPath);
+            }
+            catch (System.Exception ex)
+            {
+                Log.Error($"[RimAI-GA] Genome 저장 실패: {ex.Message}");
             }
         }
     }

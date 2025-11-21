@@ -28,10 +28,18 @@ namespace RimAI.Core.Patches
                     var manager = new RimAIManager(__instance);
                     __instance.components.Add(manager);
 
+                    // Genome 자동 로드
+                    manager.AutoLoadGenome();
+
                     // 모든 서브시스템 등록
                     RegisterAllSubsystems(manager);
 
                     Log.Message("[RimAI] RimAIManager 및 모든 서브시스템 등록 완료");
+                }
+                else
+                {
+                    // 기존 매니저가 있으면 Genome 자동 로드
+                    existingManager.AutoLoadGenome();
                 }
             }
             catch (System.Exception ex)
