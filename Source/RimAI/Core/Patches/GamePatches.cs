@@ -36,7 +36,14 @@ namespace RimAI.Core.Patches
                     // 모든 서브시스템 등록
                     RegisterAllSubsystems(manager);
 
-                    Log.Message("[RimAI] RimAIManager 및 모든 서브시스템 등록 완료");
+                    // Debug HUD 등록
+                    var existingHUD = __instance.GetComponent<RimAIDebugHUD>();
+                    if (existingHUD == null)
+                    {
+                        __instance.components.Add(new RimAIDebugHUD(__instance));
+                    }
+
+                    Log.Message("[RimAI] RimAIManager 및 모든 서브시스템 등록 완료 (Ctrl+Shift+R: Debug HUD)");
                 }
                 else
                 {
