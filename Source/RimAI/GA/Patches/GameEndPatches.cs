@@ -7,11 +7,12 @@ namespace RimAI.GA.Patches
 {
     /// <summary>
     /// 게임 종료 시점을 감지하여 metrics를 저장하는 패치들
+    /// v2.0: EndReason enum 사용, 더 많은 엔딩 케이스 처리
     /// </summary>
     public static class GameEndPatches
     {
         /// <summary>
-        /// 우주선 발사 시 (승리 엔딩)
+        /// 우주선 발사 시 (가장 일반적인 승리 엔딩)
         /// </summary>
         [HarmonyPatch(typeof(Building_ShipComputerCore), nameof(Building_ShipComputerCore.TryLaunch))]
         public static class ShipLaunch_Patch
@@ -27,7 +28,8 @@ namespace RimAI.GA.Patches
                     var collector = MetricsCollector.Instance;
                     if (collector != null)
                     {
-                        collector.OnGameEnded("ShipLaunch", true);
+                        collector.OnGameEnded(EndReason.ShipLaunched);
+                        Log.Message("[RimAI-GA] 🚀 우주선 발사 엔딩 감지");
                     }
                 }
                 catch (System.Exception ex)
@@ -38,7 +40,7 @@ namespace RimAI.GA.Patches
         }
 
         /// <summary>
-        /// 게임 종료 조건 체크 (전멸 등)
+        /// 게임 종료 조건 체크 (전멸, 포기 등)
         /// </summary>
         [HarmonyPatch(typeof(GameEnder), nameof(GameEnder.CheckOrUpdateGameOver))]
         public static class GameOver_Patch
@@ -49,35 +51,44 @@ namespace RimAI.GA.Patches
                 try
                 {
                     // 게임 오버 상태인지 확인
-                    if (__instance.gameEnding)
-                    {
-                        var collector = MetricsCollector.Instance;
-                        if (collector != null)
-                        {
-                            // 전멸 원인 파악
-                            string endReason = "Unknown";
-                            bool success = false;
+                    if (!__instance.gameEnding)
+                        return;
 
-                            // 콜로니스트가 전멸했는지 확인
-                            Map homeMap = Find.Maps?.FirstOrDefault(m => m.IsPlayerHome);
-                            if (homeMap != null)
-                            {
-                                int colonistCount = homeMap.mapPawns.FreeColonistsSpawnedCount;
-                                if (colonistCount == 0)
-                                {
-                                    endReason = "AllColonistsDead";
-                                    success = false;
-                                }
-                            }
+                    var collector = MetricsCollector.Instance;
+                    if (collector == null)
+                        return;
 
-                            collector.OnGameEnded(endReason, success);
-                        }
-                    }
+                    // 전멸 원인 파악
+                    EndReason endReason = DetermineGameOverReason();
+
+                    collector.OnGameEnded(endReason);
+                    Log.Message($"[RimAI-GA] ❌ 게임 오버: {endReason.ToKoreanString()}");
                 }
                 catch (System.Exception ex)
                 {
                     Log.Error($"[RimAI-GA] GameOver 패치 오류: {ex.Message}");
                 }
+            }
+
+            /// <summary>
+            /// 게임 오버 원인 판단
+            /// </summary>
+            private static EndReason DetermineGameOverReason()
+            {
+                // 1. 콜로니스트가 전멸했는지 확인
+                Map homeMap = Find.Maps?.FirstOrDefault(m => m.IsPlayerHome);
+                if (homeMap != null)
+                {
+                    int colonistCount = homeMap.mapPawns.FreeColonistsSpawnedCount;
+                    if (colonistCount == 0)
+                    {
+                        return EndReason.AllColonistsDead;
+                    }
+                }
+
+                // 2. 플레이어가 포기했는지 확인 (전멸은 아닌데 종료)
+                // (RimWorld에서는 명시적인 포기 플래그가 없으므로 추정)
+                return EndReason.ColonyAbandoned;
             }
         }
 
@@ -102,7 +113,7 @@ namespace RimAI.GA.Patches
                     if (__instance.RaceProps.Humanlike)
                     {
                         collector.OnColonistDied();
-                        Log.Message($"[RimAI-GA] 콜로니스트 사망: {__instance.Name}");
+                        Log.Message($"[RimAI-GA] 💀 콜로니스트 사망: {__instance.Name}");
                     }
                     else if (__instance.RaceProps.Animal)
                     {

@@ -27,11 +27,22 @@ namespace RimAI.GA
         public string GenomeId { get; set; } = "";
 
         // === 엔딩 정보 ===
-        /// <summary>엔딩 도달 여부 (true = 성공, false = 전멸/실패)</summary>
-        public bool Ended { get; set; } = false;
+        /// <summary>엔딩 이유 (enum으로 관리)</summary>
+        public EndReason EndReasonEnum { get; set; } = EndReason.Unknown;
 
-        /// <summary>엔딩 이유 (ShipLaunch, ColonyDestroyed, AllColonistsDead, etc.)</summary>
-        public string EndReason { get; set; } = "Unknown";
+        /// <summary>엔딩 도달 여부 (true = 성공, false = 전멸/실패)</summary>
+        public bool Ended
+        {
+            get => EndReasonEnum.IsSuccess();
+            set { /* JSON 역직렬화 호환성 위해 유지, 실제로는 EndReasonEnum 사용 */ }
+        }
+
+        /// <summary>엔딩 이유 (문자열, JSON 호환성 위해 유지)</summary>
+        public string EndReason
+        {
+            get => EndReasonEnum.ToEnglishString();
+            set => EndReasonEnum = EndReasonExtensions.FromString(value);
+        }
 
         /// <summary>엔딩 도달 시 in-game 일수 (없으면 마지막 일수)</summary>
         public int EndDay { get; set; } = 0;
@@ -100,56 +111,131 @@ namespace RimAI.GA
 
         // === 점수 계산 (GA fitness) ===
         /// <summary>
-        /// GA fitness 점수 계산
+        /// GA fitness 점수 계산 v2.0
         /// 높을수록 좋은 결과
+        ///
+        /// 설계 원칙:
+        /// - 엔딩 도달이 최우선 목표
+        /// - 생존, 무드, 경제를 균형있게 고려
+        /// - "엔딩만 빨리 찍는 쓰레기 전략" 방지 (사망/무드 페널티)
+        /// - 관람용 퀄리티 (무드, 정신 붕괴) 중시
         /// </summary>
         public float CalculateFitness()
         {
             float fitness = 0f;
 
-            // 1. 생존 일수 (기본 점수)
+            // 1. 생존 일수 (기본 점수: 1점/일)
             fitness += TotalDaysSurvived * 1f;
 
-            // 2. 엔딩 도달 시 큰 보너스
-            if (Ended)
+            // 2. 엔딩 도달 시 대형 보너스
+            if (EndReasonEnum.IsSuccess())
             {
+                // 2-1. 엔딩 기본 보너스
                 fitness += 5000f;
 
-                // 엔딩이 빠를수록 보너스 (효율성)
-                if (EndDay > 0 && EndDay < 365 * 5) // 5년 이내
+                // 2-2. 빠른 엔딩 보너스 (5년 이내)
+                // 엔딩이 빠를수록 효율적이지만, 너무 빠르면 품질이 떨어짐
+                if (EndDay > 0 && EndDay < 365 * 5)
                 {
-                    fitness += (365 * 5 - EndDay) * 2f;
+                    // 3년(1095일) 이후부터 보너스 시작 (너무 빠른 엔딩 방지)
+                    if (EndDay >= 365 * 3)
+                    {
+                        fitness += (365 * 5 - EndDay) * 2f;
+                    }
                 }
+            }
+            else if (EndReasonEnum.IsTimeout())
+            {
+                // 타임아웃 시 약간의 페널티 (엔딩 도달하지 못함)
+                fitness -= 1000f;
             }
 
             // 3. 콜로니스트 생존 (사망 페널티)
+            // "엔딩만 빨리 찍는 쓰레기 전략" 방지 핵심
             fitness -= ColonistDeaths * 200f;
+
+            // 3-1. 과도한 사망 추가 페널티 (5명 이상 사망)
+            if (ColonistDeaths >= 5)
+            {
+                fitness -= (ColonistDeaths - 4) * 300f; // 5명부터 300점씩 추가 페널티
+            }
 
             // 4. 콜로니 성장 보너스
             fitness += MaxColonistCount * 50f;
 
-            // 5. 무드 관리 보너스
+            // 4-1. 최종 생존자 보너스 (엔딩 시 살아있는 사람 수)
+            if (EndReasonEnum.IsSuccess())
+            {
+                fitness += FinalColonistCount * 100f; // 엔딩 시 생존자가 많으면 큰 보너스
+            }
+
+            // 5. 무드 관리 (관람용 퀄리티 핵심)
             fitness += AverageMood * 10f;
 
-            // 6. 정신 붕괴 페널티
+            // 5-1. 최저 무드 페널티 (너무 낮은 무드는 관람 퀄리티 저하)
+            if (LowestMood < 30f)
+            {
+                fitness -= (30f - LowestMood) * 20f; // 30 미만일수록 페널티
+            }
+
+            // 6. 정신 붕괴 페널티 (관람용 퀄리티)
             fitness -= MentalBreakCount * 50f;
 
+            // 6-1. 과도한 정신 붕괴 추가 페널티 (10회 이상)
+            if (MentalBreakCount >= 10)
+            {
+                fitness -= (MentalBreakCount - 9) * 100f; // 10회부터 100점씩 추가 페널티
+            }
+
             // 7. 위기 대응 능력
+            // 7-1. 전투 승률
             if (CombatCount > 0)
             {
                 float winRate = (float)CombatVictories / CombatCount;
                 fitness += winRate * 500f;
+
+                // 전투 경험 보너스 (전투를 피하지 않고 이기는 것이 중요)
+                if (winRate >= 0.8f && CombatCount >= 5)
+                {
+                    fitness += 200f; // 80% 이상 승률 + 5회 이상 전투
+                }
             }
+
+            // 7-2. 식량 위기 페널티
             fitness -= FoodCrisesCount * 100f;
+
+            // 7-3. 과도한 식량 위기 추가 페널티 (5회 이상)
+            if (FoodCrisesCount >= 5)
+            {
+                fitness -= (FoodCrisesCount - 4) * 200f; // 5회부터 200점씩 추가 페널티
+            }
 
             // 8. 경제/발전 보너스
             fitness += FinalWealth * 0.1f;
             fitness += ResearchScore * 100f;
 
-            // 9. 전멸 페널티
-            if (!Ended && FinalColonistCount == 0)
+            // 8-1. 기술 발전 보너스
+            if (TechLevel >= 0.7f)
+            {
+                fitness += 500f; // 높은 기술 레벨 보너스
+            }
+
+            // 9. 전멸 대형 페널티
+            if (EndReasonEnum.IsWipeout())
             {
                 fitness -= 3000f;
+
+                // 빠른 전멸 추가 페널티 (1년 이내 전멸)
+                if (TotalDaysSurvived < 365)
+                {
+                    fitness -= 2000f;
+                }
+            }
+
+            // 10. 콜로니 포기 페널티
+            if (EndReasonEnum == EndReason.ColonyAbandoned)
+            {
+                fitness -= 2000f;
             }
 
             return fitness;

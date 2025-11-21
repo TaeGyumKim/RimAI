@@ -14,8 +14,13 @@ namespace RimAI.GA
     {
         private RimAIRunMetrics currentMetrics = new RimAIRunMetrics();
         private bool metricsInitialized = false;
+        private bool metricsAlreadySaved = false; // 중복 저장 방지
         private int tickCounter = 0;
         private const int UPDATE_INTERVAL = 2500; // 약 1분마다 갱신
+
+        // 타임아웃 설정 (기본: 5년 = 1825일)
+        private const int TIMEOUT_DAYS = 1825;
+        private int lastTimeoutCheckDay = 0;
 
         // 누적 통계
         private float totalMoodSum = 0f;
@@ -92,6 +97,7 @@ namespace RimAI.GA
             {
                 tickCounter = 0;
                 UpdateMetrics();
+                CheckTimeout(); // 타임아웃 체크
             }
         }
 
@@ -224,10 +230,16 @@ namespace RimAI.GA
         /// <summary>
         /// 게임 종료 시 호출 (엔딩 or 전멸)
         /// </summary>
-        public void OnGameEnded(string endReason, bool success)
+        public void OnGameEnded(EndReason endReason)
         {
             if (!metricsInitialized)
                 return;
+
+            if (metricsAlreadySaved)
+            {
+                Log.Message($"[RimAI-GA] Metrics 이미 저장됨, 중복 저장 방지");
+                return;
+            }
 
             try
             {
@@ -235,16 +247,17 @@ namespace RimAI.GA
                 UpdateMetrics();
 
                 // 엔딩 정보
-                currentMetrics.Ended = success;
-                currentMetrics.EndReason = endReason;
+                currentMetrics.EndReasonEnum = endReason;
                 currentMetrics.EndDay = GenDate.DaysPassed;
                 currentMetrics.EndTime = DateTime.UtcNow;
 
                 // 저장
                 SaveMetrics();
 
+                metricsAlreadySaved = true;
+
                 // 요약 로그
-                Log.Message($"[RimAI-GA] 게임 종료: {currentMetrics}");
+                Log.Message($"[RimAI-GA] 게임 종료: {currentMetrics.EndReasonEnum.ToKoreanString()} (Fitness: {currentMetrics.CalculateFitness():F0})");
             }
             catch (Exception ex)
             {
@@ -277,6 +290,35 @@ namespace RimAI.GA
             catch (Exception ex)
             {
                 Log.Error($"[RimAI-GA] Metrics 저장 중 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 타임아웃 체크 (설정된 일수 초과 시 자동 종료)
+        /// </summary>
+        private void CheckTimeout()
+        {
+            if (metricsAlreadySaved)
+                return;
+
+            int currentDay = GenDate.DaysPassed;
+
+            // 하루에 한 번만 체크
+            if (currentDay <= lastTimeoutCheckDay)
+                return;
+
+            lastTimeoutCheckDay = currentDay;
+
+            // 타임아웃 체크
+            if (currentDay >= TIMEOUT_DAYS)
+            {
+                Log.Warning($"[RimAI-GA] 타임아웃 도달: {currentDay}일 (제한: {TIMEOUT_DAYS}일)");
+                OnGameEnded(EndReason.Timeout);
+            }
+            else if (currentDay >= TIMEOUT_DAYS - 30)
+            {
+                // 30일 전부터 경고
+                Log.Message($"[RimAI-GA] 타임아웃 임박: {currentDay}/{TIMEOUT_DAYS}일");
             }
         }
 
