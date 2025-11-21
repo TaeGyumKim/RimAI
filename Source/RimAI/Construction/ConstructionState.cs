@@ -66,7 +66,7 @@ namespace RimAI.Construction
         /// </summary>
         public bool NeedPower()
         {
-            return !HasPowerGenerator && ColonistCount >= 2;
+            return !HasPowerGenerator; // 항상 전력 필요
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace RimAI.Construction
         /// </summary>
         public bool NeedResearchBench()
         {
-            return !HasResearchBench && ColonistCount >= 3;
+            return !HasResearchBench; // 항상 연구대 필요
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace RimAI.Construction
         /// </summary>
         public bool NeedDiningArea()
         {
-            return !HasDiningArea && ColonistCount >= 2;
+            return !HasDiningArea; // 항상 식탁 필요
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace RimAI.Construction
         /// </summary>
         public bool NeedLighting()
         {
-            return NeedMoreLighting && HasPowerGenerator;
+            return NeedMoreLighting; // 전력 없어도 조명 필요 (횃불 등)
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace RimAI.Construction
         /// </summary>
         public bool NeedDefenses()
         {
-            return DefenseStructures < ColonistCount * 2; // 콜로니스트당 2개의 방어 구조물
+            return DefenseStructures < ColonistCount * 3; // 콜로니스트당 3개의 방어 구조물
         }
 
         public override string ToString()

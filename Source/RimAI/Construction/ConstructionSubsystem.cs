@@ -44,8 +44,9 @@ namespace RimAI.Construction
                 var state = ConstructionAnalyzer.AnalyzeMap(map);
                 mapStates[map] = state;
 
-                // 디버그 로그
-                LogDetailed($"{state}");
+                // 항상 로그 출력 (디버그)
+                Log.Message($"[RimAI-Construction] 분석: 침대={state.TotalBeds}/{state.ColonistCount}, 주방={state.HasKitchen}, 발전기={state.HasPowerGenerator}, 창고={state.HasStorageRoom}");
+                Log.Message($"[RimAI-Construction] 필요: 침대={state.NeedMoreBeds()}, 인프라={state.NeedBasicInfrastructure()}, 전력={state.NeedPower()}, 연구대={state.NeedResearchBench()}");
             }
             catch (System.Exception ex)
             {
@@ -183,6 +184,8 @@ namespace RimAI.Construction
             Map map = action.TargetMap;
             bool success = false;
 
+            Log.Message($"[RimAI-Construction] 액션 실행 시도: {action.Description}");
+
             try
             {
                 // 액션 타입별 처리
@@ -199,12 +202,16 @@ namespace RimAI.Construction
                 if (success)
                 {
                     lastConstructionTick[map] = Find.TickManager.TicksGame;
-                    LogInfo($"✓ {action.Description}");
+                    Log.Message($"[RimAI-Construction] ✓ 성공: {action.Description}");
+                }
+                else
+                {
+                    Log.Warning($"[RimAI-Construction] ✗ 실패: {action.Description}");
                 }
             }
             catch (System.Exception ex)
             {
-                LogError($"건설 실행 중 오류: {ex.Message}");
+                Log.Error($"[RimAI-Construction] 건설 실행 중 오류: {ex.Message}");
             }
         }
 

@@ -60,6 +60,13 @@ namespace RimAI.Core
             if (tickCounter >= TICK_INTERVAL)
             {
                 tickCounter = 0;
+
+                // 첫 번째 호출 시 로그
+                if (Find.TickManager.TicksGame < 200)
+                {
+                    Log.Message($"[RimAI] GameComponentTick 작동 중 - 서브시스템 {subsystems.Count}개 등록됨");
+                }
+
                 ProcessAllMaps();
             }
         }

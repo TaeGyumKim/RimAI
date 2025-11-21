@@ -324,9 +324,9 @@ namespace RimAI.Construction
                 if (!matchesCategory)
                     continue;
 
-                // 자원 보유량 확인
+                // 자원 보유량 확인 (최소 10개면 건설 시도)
                 int available = map.resourceCounter.GetCount(candidate);
-                if (available >= 50) // 최소 50개 이상
+                if (available >= 10) // 최소 10개 이상
                     return candidate;
             }
 
@@ -344,14 +344,14 @@ namespace RimAI.Construction
             if (costs == null || costs.Count == 0)
                 return true; // 비용이 없으면 OK
 
-            // 각 자원이 충분한지 확인
+            // 각 자원이 충분한지 확인 (청사진만 배치하면 되므로 정확한 자원만 있으면 됨)
             foreach (var cost in costs)
             {
                 int required = cost.count;
                 int available = map.resourceCounter.GetCount(cost.thingDef);
 
-                // 여유분 20% 확보 (건설 후에도 자원 남기기)
-                if (available < required * 1.2f)
+                // 정확한 양만 필요 (청사진 배치이므로)
+                if (available < required)
                     return false;
             }
 

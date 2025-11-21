@@ -18,8 +18,8 @@ namespace RimAI.Settings
         /// </summary>
         public static void DrawSettingsWindow(Rect inRect, RimAISettings settings)
         {
-            // 스크롤 뷰 (총 높이 약 600)
-            Rect viewRect = new Rect(0, 0, inRect.width - 20, 700);
+            // 스크롤 뷰 (총 높이 약 900 - 더 많은 서브시스템 포함)
+            Rect viewRect = new Rect(0, 0, inRect.width - 20, 950);
             scrollPosition = GUI.BeginScrollView(inRect, scrollPosition, viewRect);
 
             var listing = new Listing_Standard();
@@ -58,6 +58,21 @@ namespace RimAI.Settings
 
                 settings.combatIntensity = DrawIntensitySlider(listing, "전투 대응", settings.combatIntensity,
                     "적 습격 시 자동 징집 및 방어 강도");
+
+                settings.medicalIntensity = DrawIntensitySlider(listing, "의료 관리", settings.medicalIntensity,
+                    "부상자 치료, 약 제조 등 의료 자동화 강도");
+
+                settings.tradingIntensity = DrawIntensitySlider(listing, "무역 관리", settings.tradingIntensity,
+                    "상인과의 거래 자동화 강도");
+
+                settings.productionIntensity = DrawIntensitySlider(listing, "생산 관리", settings.productionIntensity,
+                    "의복, 무기 제조 등 생산 자동화 강도");
+
+                settings.equipmentIntensity = DrawIntensitySlider(listing, "장비 관리", settings.equipmentIntensity,
+                    "무기/방어구 자동 장착 강도");
+
+                settings.zoneIntensity = DrawIntensitySlider(listing, "구역 지정", settings.zoneIntensity,
+                    "농경지, 채굴, 벌목 자동 지정 강도");
 
                 listing.Gap(SECTION_GAP);
 

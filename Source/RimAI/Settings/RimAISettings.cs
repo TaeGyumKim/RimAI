@@ -59,15 +59,20 @@ namespace RimAI.Settings
 
         // === 서브시스템별 개입 강도 ===
         public AutomationIntensity foodIntensity = AutomationIntensity.High;
-        public AutomationIntensity constructionIntensity = AutomationIntensity.Medium;
-        public AutomationIntensity researchIntensity = AutomationIntensity.Medium;
+        public AutomationIntensity constructionIntensity = AutomationIntensity.High;
+        public AutomationIntensity researchIntensity = AutomationIntensity.High;
         public AutomationIntensity combatIntensity = AutomationIntensity.High;
+        public AutomationIntensity medicalIntensity = AutomationIntensity.High;
+        public AutomationIntensity tradingIntensity = AutomationIntensity.High;
+        public AutomationIntensity productionIntensity = AutomationIntensity.High;
+        public AutomationIntensity equipmentIntensity = AutomationIntensity.High;
+        public AutomationIntensity zoneIntensity = AutomationIntensity.High;
 
         // === 카메라 설정 ===
         public bool cinematicCameraEnabled = true;
 
         // === 로그 설정 ===
-        public LogLevel logLevel = LogLevel.Normal;
+        public LogLevel logLevel = LogLevel.Debug; // 기본 디버그로 - 무슨 일이 일어나는지 볼 수 있게
 
         // === 프리셋 ===
         public RimAIPreset currentPreset = RimAIPreset.FullAuto;
@@ -88,9 +93,14 @@ namespace RimAI.Settings
             Scribe_Values.Look(ref masterEnabled, "masterEnabled", true);
 
             Scribe_Values.Look(ref foodIntensity, "foodIntensity", AutomationIntensity.High);
-            Scribe_Values.Look(ref constructionIntensity, "constructionIntensity", AutomationIntensity.Medium);
-            Scribe_Values.Look(ref researchIntensity, "researchIntensity", AutomationIntensity.Medium);
+            Scribe_Values.Look(ref constructionIntensity, "constructionIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref researchIntensity, "researchIntensity", AutomationIntensity.High);
             Scribe_Values.Look(ref combatIntensity, "combatIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref medicalIntensity, "medicalIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref tradingIntensity, "tradingIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref productionIntensity, "productionIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref equipmentIntensity, "equipmentIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref zoneIntensity, "zoneIntensity", AutomationIntensity.High);
 
             Scribe_Values.Look(ref cinematicCameraEnabled, "cinematicCameraEnabled", true);
             Scribe_Values.Look(ref logLevel, "logLevel", LogLevel.Normal);
@@ -115,6 +125,11 @@ namespace RimAI.Settings
                     constructionIntensity = AutomationIntensity.High;
                     researchIntensity = AutomationIntensity.High;
                     combatIntensity = AutomationIntensity.High;
+                    medicalIntensity = AutomationIntensity.High;
+                    tradingIntensity = AutomationIntensity.High;
+                    productionIntensity = AutomationIntensity.High;
+                    equipmentIntensity = AutomationIntensity.High;
+                    zoneIntensity = AutomationIntensity.High;
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Normal;
                     break;
@@ -126,6 +141,11 @@ namespace RimAI.Settings
                     constructionIntensity = AutomationIntensity.Low;
                     researchIntensity = AutomationIntensity.Low;
                     combatIntensity = AutomationIntensity.High;
+                    medicalIntensity = AutomationIntensity.High;
+                    tradingIntensity = AutomationIntensity.Low;
+                    productionIntensity = AutomationIntensity.Low;
+                    equipmentIntensity = AutomationIntensity.Medium;
+                    zoneIntensity = AutomationIntensity.Low;
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Normal;
                     break;
@@ -137,6 +157,11 @@ namespace RimAI.Settings
                     constructionIntensity = AutomationIntensity.Full;
                     researchIntensity = AutomationIntensity.Full;
                     combatIntensity = AutomationIntensity.Full;
+                    medicalIntensity = AutomationIntensity.Full;
+                    tradingIntensity = AutomationIntensity.Full;
+                    productionIntensity = AutomationIntensity.Full;
+                    equipmentIntensity = AutomationIntensity.Full;
+                    zoneIntensity = AutomationIntensity.Full;
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Debug;
                     break;
@@ -165,8 +190,18 @@ namespace RimAI.Settings
                     return researchIntensity != AutomationIntensity.Off;
                 case "Combat":
                     return combatIntensity != AutomationIntensity.Off;
+                case "Medical":
+                    return medicalIntensity != AutomationIntensity.Off;
+                case "Trading":
+                    return tradingIntensity != AutomationIntensity.Off;
+                case "Production":
+                    return productionIntensity != AutomationIntensity.Off;
+                case "Equipment":
+                    return equipmentIntensity != AutomationIntensity.Off;
+                case "ZoneDesignation":
+                    return zoneIntensity != AutomationIntensity.Off;
                 default:
-                    return false;
+                    return true; // 알려지지 않은 서브시스템도 기본 활성화
             }
         }
 
@@ -187,8 +222,18 @@ namespace RimAI.Settings
                     return researchIntensity;
                 case "Combat":
                     return combatIntensity;
+                case "Medical":
+                    return medicalIntensity;
+                case "Trading":
+                    return tradingIntensity;
+                case "Production":
+                    return productionIntensity;
+                case "Equipment":
+                    return equipmentIntensity;
+                case "ZoneDesignation":
+                    return zoneIntensity;
                 default:
-                    return AutomationIntensity.Off;
+                    return AutomationIntensity.High; // 기본값은 High
             }
         }
 
