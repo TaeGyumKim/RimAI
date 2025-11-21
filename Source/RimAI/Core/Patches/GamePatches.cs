@@ -2,6 +2,7 @@ using HarmonyLib;
 using RimAI.Food;
 using RimAI.Construction;
 using RimAI.Research;
+using RimAI.Production;
 using Verse;
 
 namespace RimAI.Core.Patches
@@ -53,7 +54,10 @@ namespace RimAI.Core.Patches
             // 3. 건설 서브시스템 (우선순위: 50)
             manager.RegisterSubsystem(new ConstructionSubsystem());
 
-            // 4. 연구 서브시스템 (우선순위: 30)
+            // 4. 생산 서브시스템 (우선순위: 30)
+            manager.RegisterSubsystem(new ProductionSubsystem());
+
+            // 5. 연구 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ResearchSubsystem());
         }
     }

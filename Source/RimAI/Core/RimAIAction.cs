@@ -26,6 +26,18 @@ namespace RimAI.Core
         /// <summary>위기 대응</summary>
         EmergencyResponse,
 
+        /// <summary>작업대에 Bill 추가</summary>
+        CreateBill,
+
+        /// <summary>기존 Bill 수정 (목표 수량, 반복 조건 등)</summary>
+        ModifyBill,
+
+        /// <summary>Bill 일시 중단/재개</summary>
+        PauseBill,
+
+        /// <summary>Bill 삭제</summary>
+        DeleteBill,
+
         /// <summary>기타</summary>
         Other
     }

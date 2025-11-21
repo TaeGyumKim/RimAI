@@ -298,6 +298,94 @@ namespace RimAI.Core
         }
 
         /// <summary>
+        /// 생산 관련 스토리 로그
+        /// </summary>
+        public static class Production
+        {
+            public static void WeaponShortage(int needed)
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Fortress)
+                {
+                    Log($"무기가 부족합니다! 방어력 강화를 위해 {needed}개 생산을 시작합니다.");
+                }
+                else
+                {
+                    Log($"무기가 부족합니다! {needed}개 생산을 시작합니다.");
+                }
+            }
+
+            public static void ArmorProduction(int count)
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Fortress)
+                {
+                    Log($"방어력 강화! 갑옷 {count}벌 생산을 계획합니다.");
+                }
+                else
+                {
+                    Log($"갑옷 {count}벌 생산을 시작합니다.");
+                }
+            }
+
+            public static void WinterPreparation(int daysLeft)
+            {
+                Log($"겨울 대비를 위해 겨울 옷 생산을 시작합니다. ({daysLeft}일 남음)");
+            }
+
+            public static void ResourceShortage(string resourceName)
+            {
+                Log($"{resourceName} 부족으로 비필수 생산을 일시 중단합니다.");
+            }
+
+            public static void ResourceSurplus()
+            {
+                Log($"자원 여유로 고품질 장비 생산을 시작합니다.");
+            }
+
+            public static void QualityUpgrade(string itemType)
+            {
+                var style = RimAI_Mod.Settings.playStyle;
+
+                if (style == Settings.RimAIPlayStyle.Researcher)
+                {
+                    Log($"고품질 {itemType} 생산으로 콜로니를 업그레이드합니다.");
+                }
+                else
+                {
+                    Log($"자원 여유로 고품질 {itemType} 생산을 시작합니다.");
+                }
+            }
+
+            public static void PausedDueToResources(string billName)
+            {
+                Log($"자원 부족으로 '{billName}' 생산을 일시 중단합니다.");
+            }
+
+            public static void ResumedProduction(string billName)
+            {
+                Log($"자원 확보! '{billName}' 생산을 재개합니다.");
+            }
+
+            public static void ClothingReplacement()
+            {
+                Log($"낡은 옷을 교체합니다. 콜로니스트들의 만족도가 향상됩니다.");
+            }
+
+            public static void MedicineProduction(int target)
+            {
+                Log($"의약품 비축을 시작합니다. 목표: {target}개");
+            }
+
+            public static void EmergencyProduction(string itemType)
+            {
+                Log($"⚠️ 긴급 생산! {itemType}이(가) 즉시 필요합니다.", playStylePrefix: false);
+            }
+        }
+
+        /// <summary>
         /// 일반 스토리 이벤트
         /// </summary>
         public static class General

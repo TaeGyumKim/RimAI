@@ -141,8 +141,8 @@ namespace RimAI.Core
             if (subsystem.Name == "Combat" || subsystem.Name == "Food")
                 return false;
 
-            // Construction, Research는 전투 중 일시 정지
-            if (subsystem.Name == "Construction" || subsystem.Name == "Research")
+            // Construction, Production, Research는 전투 중 일시 정지
+            if (subsystem.Name == "Construction" || subsystem.Name == "Production" || subsystem.Name == "Research")
                 return true;
 
             return false;
