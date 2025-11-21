@@ -2,6 +2,7 @@ using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
+using Verse.AI;
 
 namespace RimAI.GA.Patches
 {
@@ -12,25 +13,33 @@ namespace RimAI.GA.Patches
     public static class GameEndPatches
     {
         /// <summary>
-        /// 우주선 발사 시 (가장 일반적인 승리 엔딩)
+        /// 우주선 카운트다운 완료 시 (가장 일반적인 승리 엔딩)
+        /// ShipCountdown.CountdownEnded가 true가 되면 우주선 발사 완료
         /// </summary>
-        [HarmonyPatch(typeof(Building_ShipComputerCore), nameof(Building_ShipComputerCore.TryLaunch))]
+        [HarmonyPatch(typeof(ShipCountdown), nameof(ShipCountdown.ShipCountdownUpdate))]
         public static class ShipLaunch_Patch
         {
-            [HarmonyPostfix]
-            public static void Postfix(bool __result)
-            {
-                if (!__result)
-                    return;
+            private static bool wasCountingDown = false;
 
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
                 try
                 {
-                    var collector = MetricsCollector.Instance;
-                    if (collector != null)
+                    // 카운트다운이 진행 중이었는데 끝났으면 발사 완료
+                    bool isCountingDown = ShipCountdown.CountingDown;
+
+                    if (wasCountingDown && !isCountingDown)
                     {
-                        collector.OnGameEnded(EndReason.ShipLaunched);
-                        Log.Message("[RimAI-GA] 🚀 우주선 발사 엔딩 감지");
+                        var collector = MetricsCollector.Instance;
+                        if (collector != null)
+                        {
+                            collector.OnGameEnded(EndReason.ShipLaunched);
+                            Log.Message("[RimAI-GA] 우주선 발사 엔딩 감지");
+                        }
                     }
+
+                    wasCountingDown = isCountingDown;
                 }
                 catch (System.Exception ex)
                 {
