@@ -268,7 +268,7 @@ namespace RimAI.Core
                             executedActions.RemoveAt(0);
                         }
 
-                        if (RimAI_Settings.EnableDetailedLogging && Prefs.DevMode)
+                        if (RimAI_Mod.Settings.ShouldLog(RimAI.Settings.LogLevel.Detailed))
                         {
                             Log.Message($"[RimAI] 액션 실행: {action}");
                         }

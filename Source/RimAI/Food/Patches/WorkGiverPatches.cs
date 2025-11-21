@@ -17,7 +17,7 @@ namespace RimAI.Food.Patches
         [HarmonyPostfix]
         public static void Postfix(ref bool __result, Pawn pawn)
         {
-            if (!RimAI_Settings.EnableFoodAutomation) return;
+            if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
 
             var manager = RimAIManager.Instance;
             if (manager == null) return;
@@ -52,7 +52,7 @@ namespace RimAI.Food.Patches
         [HarmonyPostfix]
         public static void Postfix(ref bool __result, Pawn pawn)
         {
-            if (!RimAI_Settings.EnableFoodAutomation) return;
+            if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
 
             var manager = RimAIManager.Instance;
             if (manager == null) return;
@@ -84,7 +84,7 @@ namespace RimAI.Food.Patches
         [HarmonyPostfix]
         public static void Postfix(ref bool __result, Pawn pawn)
         {
-            if (!RimAI_Settings.EnableFoodAutomation) return;
+            if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
 
             var manager = RimAIManager.Instance;
             if (manager == null) return;
@@ -120,7 +120,7 @@ namespace RimAI.Food.Patches
         [HarmonyPostfix]
         public static void Postfix(ref bool __result, Pawn pawn, bool forced)
         {
-            if (!RimAI_Settings.EnableFoodAutomation) return;
+            if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
             if (forced) return; // 플레이어가 강제 지시한 경우 무시
 
             var manager = RimAIManager.Instance;
@@ -155,7 +155,7 @@ namespace RimAI.Food.Patches
         [HarmonyPostfix]
         public static void Postfix(ref int __result, Pawn_WorkSettings __instance, WorkTypeDef w)
         {
-            if (!RimAI_Settings.EnableFoodAutomation) return;
+            if (!RimAI_Mod.Settings.IsSubsystemEnabled("Food")) return;
             if (__result == 0) return; // 비활성화된 작업은 건드리지 않음
 
             var pawn = __instance.pawn;

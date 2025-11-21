@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RimAI.Settings;
 using Verse;
 
 namespace RimAI.Core
@@ -66,15 +67,29 @@ namespace RimAI.Core
     public abstract class RimAISubsystemBase : IRimAISubsystem
     {
         protected int tickCounter = 0;
-        protected int updateInterval = 300; // 기본 5초
+        protected int baseUpdateInterval = 300; // 기본 5초
+        protected int updateInterval = 300;
 
         public abstract string Name { get; }
         public abstract int Priority { get; }
         public bool Enabled { get; set; } = true;
 
+        /// <summary>
+        /// 설정 참조
+        /// </summary>
+        protected RimAISettings Settings => RimAI_Mod.Settings;
+
+        /// <summary>
+        /// 현재 서브시스템의 개입 강도
+        /// </summary>
+        protected AutomationIntensity CurrentIntensity => Settings.GetIntensity(Name);
+
         public virtual void Initialize()
         {
-            Log.Message($"[RimAI] {Name} 서브시스템 초기화");
+            // 개입 강도에 따라 업데이트 간격 조정
+            UpdateIntervalFromSettings();
+
+            LogInfo($"{Name} 서브시스템 초기화 (강도: {CurrentIntensity}, 간격: {updateInterval}틱)");
         }
 
         public abstract void Update(Map map);
@@ -88,7 +103,7 @@ namespace RimAI.Core
 
         public virtual string GetDebugInfo(Map map)
         {
-            return $"[{Name}] Enabled: {Enabled}";
+            return $"[{Name}] Enabled: {Enabled}, Intensity: {CurrentIntensity}";
         }
 
         /// <summary>
@@ -96,13 +111,78 @@ namespace RimAI.Core
         /// </summary>
         protected bool ShouldUpdate()
         {
+            // 설정에서 비활성화되어 있으면 업데이트 안 함
+            if (!Settings.IsSubsystemEnabled(Name))
+            {
+                return false;
+            }
+
             tickCounter++;
             if (tickCounter >= updateInterval)
             {
                 tickCounter = 0;
+                UpdateIntervalFromSettings(); // 간격 재계산
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 설정에서 업데이트 간격 업데이트
+        /// </summary>
+        protected void UpdateIntervalFromSettings()
+        {
+            float multiplier = RimAISettings.GetUpdateIntervalMultiplier(CurrentIntensity);
+            updateInterval = (int)(baseUpdateInterval * multiplier);
+        }
+
+        /// <summary>
+        /// 로그 출력 헬퍼 (로그 레벨 고려)
+        /// </summary>
+        protected void LogInfo(string message)
+        {
+            if (Settings.ShouldLog(LogLevel.Normal))
+            {
+                Log.Message($"[RimAI-{Name}] {message}");
+            }
+        }
+
+        /// <summary>
+        /// 상세 로그 출력
+        /// </summary>
+        protected void LogDetailed(string message)
+        {
+            if (Settings.ShouldLog(LogLevel.Detailed))
+            {
+                Log.Message($"[RimAI-{Name}] {message}");
+            }
+        }
+
+        /// <summary>
+        /// 디버그 로그 출력
+        /// </summary>
+        protected void LogDebug(string message)
+        {
+            if (Settings.ShouldLog(LogLevel.Debug))
+            {
+                Log.Message($"[RimAI-{Name}-DEBUG] {message}");
+            }
+        }
+
+        /// <summary>
+        /// 경고 로그 (항상 출력)
+        /// </summary>
+        protected void LogWarning(string message)
+        {
+            Log.Warning($"[RimAI-{Name}] {message}");
+        }
+
+        /// <summary>
+        /// 오류 로그 (항상 출력)
+        /// </summary>
+        protected void LogError(string message)
+        {
+            Log.Error($"[RimAI-{Name}] {message}");
         }
     }
 }

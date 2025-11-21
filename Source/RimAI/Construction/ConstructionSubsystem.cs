@@ -23,13 +23,13 @@ namespace RimAI.Construction
 
         public ConstructionSubsystem()
         {
-            updateInterval = 600; // 10초마다 업데이트
+            baseUpdateInterval = 600; // 10초마다 업데이트
         }
 
         public override void Initialize()
         {
             base.Initialize();
-            Enabled = RimAI_Settings.EnableConstructionAutomation;
+            // 설정은 베이스 클래스에서 자동 처리됨
         }
 
         public override void Update(Map map)
@@ -44,14 +44,11 @@ namespace RimAI.Construction
                 mapStates[map] = state;
 
                 // 디버그 로그
-                if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
-                {
-                    Log.Message($"[RimAI-Construction] {state}");
-                }
+                LogDetailed($"{state}");
             }
             catch (System.Exception ex)
             {
-                Log.Error($"[RimAI-Construction] 맵 {map} 업데이트 중 오류: {ex}");
+                LogError($"맵 {map} 업데이트 중 오류: {ex}");
             }
         }
 
@@ -132,7 +129,7 @@ namespace RimAI.Construction
 
             // 실제 건설 로직
             // 현재는 로그만 출력하고, 향후 확장 시 실제 청사진 배치 구현
-            Log.Message($"[RimAI-Construction] {action.Description}");
+            LogInfo(action.Description);
 
             // TODO: 실제 건설 구현
             // - 적절한 위치 찾기 (빈 공간, 접근 가능한 곳)

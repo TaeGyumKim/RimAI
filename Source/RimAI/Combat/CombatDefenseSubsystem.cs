@@ -27,13 +27,13 @@ namespace RimAI.Combat
 
         public CombatDefenseSubsystem()
         {
-            updateInterval = 60; // 1초마다 업데이트 (전투는 빠른 반응 필요)
+            baseUpdateInterval = 60; // 1초마다 업데이트 (전투는 빠른 반응 필요)
         }
 
         public override void Initialize()
         {
             base.Initialize();
-            Enabled = RimAI_Settings.EnableCombatAutomation;
+            // 설정은 베이스 클래스에서 자동 처리됨
         }
 
         public override void Update(Map map)
@@ -53,17 +53,14 @@ namespace RimAI.Combat
                 mapThreatStates[map] = state;
 
                 // 디버그 로그
-                if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
+                if (state.CurrentThreatLevel != ThreatLevel.None)
                 {
-                    if (state.CurrentThreatLevel != ThreatLevel.None)
-                    {
-                        Log.Message($"[RimAI-Combat] {state}");
-                    }
+                    LogDetailed($"{state}");
                 }
             }
             catch (System.Exception ex)
             {
-                Log.Error($"[RimAI-Combat] 맵 {map} 업데이트 중 오류: {ex}");
+                LogError($"맵 {map} 업데이트 중 오류: {ex}");
             }
         }
 
@@ -142,7 +139,7 @@ namespace RimAI.Combat
 
                 case ThreatLevel.Low:
                     // 경계 태세 - 로그만
-                    Log.Message($"[RimAI-Combat] {action.Description}");
+                    LogInfo(action.Description);
                     break;
 
                 case ThreatLevel.Medium:
@@ -166,7 +163,7 @@ namespace RimAI.Combat
                 state.InCombat = true;
                 state.CombatStartTick = Find.TickManager.TicksGame;
 
-                Log.Warning($"[RimAI-Combat] 전투 시작! 위협 레벨: {state.CurrentThreatLevel}, 적: {state.TotalEnemies}명");
+                LogWarning($"전투 시작! 위협 레벨: {state.CurrentThreatLevel}, 적: {state.TotalEnemies}명");
 
                 // 카메라 이동 (전투 위치로)
                 CinematicCameraHelper.FocusOnCombat(map, state.ThreatCenter);
@@ -189,7 +186,7 @@ namespace RimAI.Combat
             mapsInCombat.Remove(map);
             state.InCombat = false;
 
-            Log.Message($"[RimAI-Combat] 전투 종료! 지속시간: {state.CombatDurationSeconds:F1}초");
+            LogInfo($"전투 종료! 지속시간: {state.CombatDurationSeconds:F1}초");
 
             // 모든 폰 Undraft
             UndraftAllPawns(map);
@@ -216,7 +213,7 @@ namespace RimAI.Combat
 
             if (draftedCount > 0)
             {
-                Log.Message($"[RimAI-Combat] {draftedCount}명 Draft 완료");
+                LogInfo($"{draftedCount}명 Draft 완료");
             }
         }
 
@@ -239,7 +236,7 @@ namespace RimAI.Combat
 
             if (undraftedCount > 0)
             {
-                Log.Message($"[RimAI-Combat] {undraftedCount}명 Undraft 완료 - 일상 복귀");
+                LogInfo($"{undraftedCount}명 Undraft 완료 - 일상 복귀");
             }
         }
 

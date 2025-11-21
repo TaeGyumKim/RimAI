@@ -3,17 +3,20 @@
     <name>RimAI - Auto Pilot</name>
     <author>RimAI Team</author>
     <packageId>rimai.autopilot</packageId>
-    <description>RimWorld 자동 플레이 모드. 식량, 건설, 연구, 생산, 의료, 전투 등 대부분의 결정을 자동으로 처리합니다.
+    <description>RimWorld 완전 자동화 모드. 진짜 "관람용 방치 플레이"를 가능하게 합니다!
 
 [주요 기능]
-- 자동 작업 우선순위 조정
-- 식량 및 농사 자동 관리
-- 건설 및 생산 자동 계획
-- 위기 상황 자동 대응
+✅ 식량 자동 관리 (농사/사냥/요리)
+✅ 건설 자동화 (침대, 인프라, 방어 시설)
+✅ 연구 자동 선택
+✅ 전투 자동 대응 + 시네마틱 카메라
+✅ 설정 시스템 (프리셋 + 세부 조정)
 
-[버전 정보]
-현재 버전: 0.1.0 (알파)
-1단계: 기본 스캐폴딩 및 코어 시스템</description>
+[사용 방법]
+옵션 → 모드 설정 → RimAI → 프리셋 선택 → 관람 시작!
+
+[현재 버전]
+v0.4.0 (베타) - Stage 5: 설정/UX 레이어</description>
     <supportedVersions>
         <li>1.4</li>
         <li>1.5</li>

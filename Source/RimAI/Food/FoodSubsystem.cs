@@ -19,13 +19,13 @@ namespace RimAI.Food
 
         public FoodSubsystem()
         {
-            updateInterval = 300; // 5초마다 업데이트
+            baseUpdateInterval = 300; // 5초마다 업데이트
         }
 
         public override void Initialize()
         {
             base.Initialize();
-            Enabled = RimAI_Settings.EnableFoodAutomation;
+            // 설정은 베이스 클래스에서 자동 처리됨
         }
 
         public override void Update(Map map)
@@ -44,15 +44,12 @@ namespace RimAI.Food
                 mapDecisions[map] = decision;
 
                 // 3. 디버그 로그
-                if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
-                {
-                    Log.Message($"[RimAI-Food] {state}");
-                    Log.Message($"[RimAI-Food] {decision}");
-                }
+                LogDetailed($"{state}");
+                LogDetailed($"{decision}");
             }
             catch (System.Exception ex)
             {
-                Log.Error($"[RimAI-Food] 맵 {map} 업데이트 중 오류: {ex}");
+                LogError($"맵 {map} 업데이트 중 오류: {ex}");
             }
         }
 

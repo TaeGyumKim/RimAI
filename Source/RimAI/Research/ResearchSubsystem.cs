@@ -21,13 +21,13 @@ namespace RimAI.Research
 
         public ResearchSubsystem()
         {
-            updateInterval = 1200; // 20초마다 업데이트
+            baseUpdateInterval = 1200; // 20초마다 업데이트
         }
 
         public override void Initialize()
         {
             base.Initialize();
-            Enabled = RimAI_Settings.EnableResearchAutomation;
+            // 설정은 베이스 클래스에서 자동 처리됨
         }
 
         public override void Update(Map map)
@@ -43,10 +43,7 @@ namespace RimAI.Research
                 // 현재 연구 중인 프로젝트가 있으면 변경하지 않음
                 if (Find.ResearchManager.currentProj != null)
                 {
-                    if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
-                    {
-                        Log.Message($"[RimAI-Research] 현재 연구 중: {Find.ResearchManager.currentProj.label}");
-                    }
+                    LogDetailed($"현재 연구 중: {Find.ResearchManager.currentProj.label}");
                     return;
                 }
 
@@ -57,14 +54,11 @@ namespace RimAI.Research
                 }
 
                 // 디버그 로그
-                if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
-                {
-                    Log.Message($"[RimAI-Research] 연구 프로젝트 없음, 자동 선택 시도");
-                }
+                LogDetailed("연구 프로젝트 없음, 자동 선택 시도");
             }
             catch (System.Exception ex)
             {
-                Log.Error($"[RimAI-Research] 업데이트 중 오류: {ex}");
+                LogError($"업데이트 중 오류: {ex}");
             }
         }
 
@@ -110,7 +104,7 @@ namespace RimAI.Research
                 // 연구 프로젝트 시작
                 Find.ResearchManager.currentProj = action.TargetResearch;
 
-                Log.Message($"[RimAI-Research] 연구 시작: {action.TargetResearch.label}");
+                LogInfo($"연구 시작: {action.TargetResearch.label}");
 
                 // 쿨다운 설정
                 if (action.TargetMap != null)
@@ -120,7 +114,7 @@ namespace RimAI.Research
             }
             catch (System.Exception ex)
             {
-                Log.Error($"[RimAI-Research] 연구 선택 중 오류: {ex}");
+                LogError($"연구 선택 중 오류: {ex}");
             }
         }
 
@@ -142,13 +136,10 @@ namespace RimAI.Research
                 .OrderByDescending(x => x.Score)
                 .ToList();
 
-            if (Prefs.DevMode && RimAI_Settings.EnableDetailedLogging)
+            LogDetailed("상위 3개 연구:");
+            foreach (var item in scoredProjects.Take(3))
             {
-                Log.Message($"[RimAI-Research] 상위 3개 연구:");
-                foreach (var item in scoredProjects.Take(3))
-                {
-                    Log.Message($"  - {item.Project.label}: {item.Score:F1}점");
-                }
+                LogDetailed($"  - {item.Project.label}: {item.Score:F1}점");
             }
 
             return scoredProjects.FirstOrDefault()?.Project;

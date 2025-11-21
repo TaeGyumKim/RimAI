@@ -29,7 +29,7 @@ namespace RimAI.Combat
         /// <param name="focusPosition">집중할 위치</param>
         public static void FocusOnCombat(Map map, IntVec3 focusPosition)
         {
-            if (!RimAI_Settings.EnableCinematicCamera) return;
+            if (!RimAI_Mod.Settings.cinematicCameraEnabled) return;
 
             try
             {
@@ -62,7 +62,7 @@ namespace RimAI.Combat
         /// </summary>
         public static void ResetCamera()
         {
-            if (!RimAI_Settings.EnableCinematicCamera) return;
+            if (!RimAI_Mod.Settings.cinematicCameraEnabled) return;
             if (!isCinematicMode) return;
 
             try
@@ -110,7 +110,7 @@ namespace RimAI.Combat
         /// <param name="pawn">추적할 폰</param>
         public static void TrackPawn(Pawn pawn)
         {
-            if (!RimAI_Settings.EnableCinematicCamera) return;
+            if (!RimAI_Mod.Settings.cinematicCameraEnabled) return;
             if (pawn == null || pawn.Map == null) return;
 
             try
@@ -136,7 +136,7 @@ namespace RimAI.Combat
         /// <param name="pos2">두 번째 위치</param>
         public static void FrameTwoPositions(IntVec3 pos1, IntVec3 pos2)
         {
-            if (!RimAI_Settings.EnableCinematicCamera) return;
+            if (!RimAI_Mod.Settings.cinematicCameraEnabled) return;
 
             try
             {
@@ -162,17 +162,5 @@ namespace RimAI.Combat
         /// 현재 시네마틱 모드 여부
         /// </summary>
         public static bool IsCinematicMode => isCinematicMode;
-    }
-
-    /// <summary>
-    /// 카메라 연출 관련 설정 (RimAI_Settings에 추가)
-    /// </summary>
-    public static partial class RimAI_Settings
-    {
-        /// <summary>시네마틱 카메라 활성화</summary>
-        public static bool EnableCinematicCamera = true;
-
-        /// <summary>전투 자동화 활성화</summary>
-        public static bool EnableCombatAutomation = true;
     }
 }
