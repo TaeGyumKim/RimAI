@@ -67,6 +67,7 @@ namespace RimAI.Settings
         public AutomationIntensity productionIntensity = AutomationIntensity.High;
         public AutomationIntensity equipmentIntensity = AutomationIntensity.High;
         public AutomationIntensity zoneIntensity = AutomationIntensity.High;
+        public AutomationIntensity workPriorityIntensity = AutomationIntensity.High;
 
         // === 카메라 설정 ===
         public bool cinematicCameraEnabled = true;
@@ -101,6 +102,7 @@ namespace RimAI.Settings
             Scribe_Values.Look(ref productionIntensity, "productionIntensity", AutomationIntensity.High);
             Scribe_Values.Look(ref equipmentIntensity, "equipmentIntensity", AutomationIntensity.High);
             Scribe_Values.Look(ref zoneIntensity, "zoneIntensity", AutomationIntensity.High);
+            Scribe_Values.Look(ref workPriorityIntensity, "workPriorityIntensity", AutomationIntensity.High);
 
             Scribe_Values.Look(ref cinematicCameraEnabled, "cinematicCameraEnabled", true);
             Scribe_Values.Look(ref logLevel, "logLevel", LogLevel.Normal);
@@ -130,6 +132,7 @@ namespace RimAI.Settings
                     productionIntensity = AutomationIntensity.High;
                     equipmentIntensity = AutomationIntensity.High;
                     zoneIntensity = AutomationIntensity.High;
+                    workPriorityIntensity = AutomationIntensity.High;
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Normal;
                     break;
@@ -146,6 +149,7 @@ namespace RimAI.Settings
                     productionIntensity = AutomationIntensity.Low;
                     equipmentIntensity = AutomationIntensity.Medium;
                     zoneIntensity = AutomationIntensity.Low;
+                    workPriorityIntensity = AutomationIntensity.High; // 작업 우선순위는 항상 필요
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Normal;
                     break;
@@ -162,6 +166,7 @@ namespace RimAI.Settings
                     productionIntensity = AutomationIntensity.Full;
                     equipmentIntensity = AutomationIntensity.Full;
                     zoneIntensity = AutomationIntensity.Full;
+                    workPriorityIntensity = AutomationIntensity.Full;
                     cinematicCameraEnabled = true;
                     logLevel = LogLevel.Debug;
                     break;
@@ -200,6 +205,8 @@ namespace RimAI.Settings
                     return equipmentIntensity != AutomationIntensity.Off;
                 case "ZoneDesignation":
                     return zoneIntensity != AutomationIntensity.Off;
+                case "WorkPriority":
+                    return workPriorityIntensity != AutomationIntensity.Off;
                 default:
                     return true; // 알려지지 않은 서브시스템도 기본 활성화
             }
@@ -232,6 +239,8 @@ namespace RimAI.Settings
                     return equipmentIntensity;
                 case "ZoneDesignation":
                     return zoneIntensity;
+                case "WorkPriority":
+                    return workPriorityIntensity;
                 default:
                     return AutomationIntensity.High; // 기본값은 High
             }

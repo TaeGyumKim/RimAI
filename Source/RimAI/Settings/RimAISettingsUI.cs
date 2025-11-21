@@ -18,8 +18,8 @@ namespace RimAI.Settings
         /// </summary>
         public static void DrawSettingsWindow(Rect inRect, RimAISettings settings)
         {
-            // 스크롤 뷰 (총 높이 약 900 - 더 많은 서브시스템 포함)
-            Rect viewRect = new Rect(0, 0, inRect.width - 20, 950);
+            // 스크롤 뷰 (총 높이 약 1000 - 모든 서브시스템 포함)
+            Rect viewRect = new Rect(0, 0, inRect.width - 20, 1000);
             scrollPosition = GUI.BeginScrollView(inRect, scrollPosition, viewRect);
 
             var listing = new Listing_Standard();
@@ -73,6 +73,9 @@ namespace RimAI.Settings
 
                 settings.zoneIntensity = DrawIntensitySlider(listing, "구역 지정", settings.zoneIntensity,
                     "농경지, 채굴, 벌목 자동 지정 강도");
+
+                settings.workPriorityIntensity = DrawIntensitySlider(listing, "작업 우선순위", settings.workPriorityIntensity,
+                    "폰들의 작업 우선순위 자동 관리 강도");
 
                 listing.Gap(SECTION_GAP);
 

@@ -7,6 +7,7 @@ using RimAI.Medical;
 using RimAI.Trading;
 using RimAI.Zones;
 using RimAI.Equipment;
+using RimAI.Work;
 using Verse;
 
 namespace RimAI.Core.Patches
@@ -70,25 +71,28 @@ namespace RimAI.Core.Patches
             // 2. 식량 서브시스템 (우선순위: 100)
             manager.RegisterSubsystem(new FoodSubsystem());
 
-            // 3. 의료 서브시스템 (우선순위: 95 - 식량 다음)
+            // 3. 작업 우선순위 서브시스템 (우선순위: 95 - 매우 중요!)
+            manager.RegisterSubsystem(new WorkPrioritySubsystem());
+
+            // 4. 의료 서브시스템 (우선순위: 95 - 식량 다음)
             manager.RegisterSubsystem(new MedicalSubsystem());
 
-            // 4. 장비 서브시스템 (우선순위: 55)
-            manager.RegisterSubsystem(new EquipmentSubsystem());
-
-            // 5. 건설 서브시스템 (우선순위: 50)
-            manager.RegisterSubsystem(new ConstructionSubsystem());
-
-            // 6. 구역/지정 서브시스템 (우선순위: 45)
+            // 5. 구역/지정 서브시스템 (우선순위: 90 - 자원 수집!)
             manager.RegisterSubsystem(new ZoneDesignationSubsystem());
 
-            // 6. 무역 서브시스템 (우선순위: 40)
+            // 6. 장비 서브시스템 (우선순위: 55)
+            manager.RegisterSubsystem(new EquipmentSubsystem());
+
+            // 7. 건설 서브시스템 (우선순위: 50)
+            manager.RegisterSubsystem(new ConstructionSubsystem());
+
+            // 8. 무역 서브시스템 (우선순위: 40)
             manager.RegisterSubsystem(new TradingSubsystem());
 
-            // 7. 생산 서브시스템 (우선순위: 30)
+            // 9. 생산 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ProductionSubsystem());
 
-            // 8. 연구 서브시스템 (우선순위: 30)
+            // 10. 연구 서브시스템 (우선순위: 30)
             manager.RegisterSubsystem(new ResearchSubsystem());
         }
     }
